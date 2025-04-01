@@ -5,6 +5,7 @@ A powerful and flexible library for comparing JSON objects with support for deep
 ## Features
 
 - **Deep Comparison**: Perform a deep comparison of JSON objects, including nested objects and arrays.
+- **Advanced Type Checking**: Compare values with precise type detection, identifying specific data types (string, number, array, object, null, etc.) and providing detailed type mismatch information.
 - **Key and Value Type Comparison**: Compare both keys and value types, ensuring that mismatches in types are reported.
 - **Regex Checks**: Validate string values against regex patterns, with support for both exact path matching and key name matching.
 - **Result Structure**: Get results in a structured format that clearly indicates matched keys and values, unmatched keys, unmatched values, and regex check results.
@@ -172,6 +173,109 @@ const comparator = new JSONCompare({
 });
 
 // Keys in obj2 that aren't in obj1 will be ignored
+```
+
+## Type Checking
+
+The library includes advanced type checking capabilities to identify and report the specific types of values being compared.
+
+### Supported Types
+
+The following types are precisely detected:
+- Primitive types: `string`, `number`, `boolean`, `undefined`
+- Complex types: `array`, `object`, `null`
+- Special objects: `date`, `regex`
+- Custom object types based on constructor name
+
+### Type Checking Example
+
+```javascript
+const JSONCompare = require('json-deep-compare');
+
+const obj1 = {
+  id: 1,                     // Number
+  name: "Product",           // String
+  price: "19.99"             // String (will be compared with a number)
+};
+
+const obj2 = {
+  id: "1",                   // String (type mismatch with obj1.id)
+  name: "Product",           // String (matching)
+  price: 19.99               // Number (type mismatch with obj1.price)
+};
+
+// Create a JSONCompare instance
+const compare = new JSONCompare({
+  strictTypes: false  // Set to true to fail comparison on type mismatches
+});
+
+// Perform the comparison
+const result = compare.compare(obj1, obj2);
+
+// Check for type mismatches
+if (result.unmatched.types.length > 0) {
+  console.log("Type mismatches found:");
+  result.unmatched.types.forEach(mismatch => {
+    console.log(`Path: ${mismatch.path}`);
+    console.log(`Expected type: ${mismatch.expected}, Actual type: ${mismatch.actual}`);
+  });
+}
+```
+
+### Strict Type Checking
+
+When `strictTypes` is set to `true`, the comparison will stop at the first type mismatch for each path:
+
+```javascript
+const strictCompare = new JSONCompare({ strictTypes: true });
+const strictResult = strictCompare.compare(obj1, obj2);
+```
+
+### Type Information in Results
+
+Type information is included in both matched and unmatched values:
+
+```javascript
+// For matched values
+{
+  path: "name",
+  value: "Product",
+  type: "string"
+}
+
+// For unmatched values
+{
+  path: "id",
+  expected: 1,
+  actual: "1",
+  expectedType: "number",
+  actualType: "string",
+  message: "Values do not match"
+}
+
+// For type mismatches
+{
+  path: "id",
+  expected: "number",
+  actual: "string",
+  message: "Types do not match: expected 'number', got 'string'"
+}
+```
+
+### Type-Safe Equivalence
+
+When using equivalence rules with different types, the types are still reported correctly:
+
+```javascript
+const compare = new JSONCompare({
+  equivalentValues: {
+    'nullish': [null, undefined]
+  }
+});
+
+// Result will show:
+// "Values considered equivalent by rule 'nullish'"
+// but will still report type1: "null", type2: "undefined"
 ```
 
 ## License

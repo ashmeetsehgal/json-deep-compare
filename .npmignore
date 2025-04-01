@@ -33,6 +33,7 @@ rollup.config.js
 # Examples (these can go in the README instead)
 examples/
 example.js
+*-example.js
 
 # Misc
 *.log

@@ -22,6 +22,28 @@ class Comparator {
   }
 
   /**
+   * Get the specific type of a value
+   * @param {*} value - The value to check
+   * @returns {string} The specific type of the value (string, number, array, object, null, etc.)
+   */
+  getValueType(value) {
+    if (value === null) return 'null';
+    if (Array.isArray(value)) return 'array';
+    if (value instanceof Date) return 'date';
+    if (value instanceof RegExp) return 'regex';
+    
+    const type = typeof value;
+    
+    // For objects, we return 'object' unless it's a special built-in object
+    if (type === 'object') {
+      const constructor = value.constructor.name.toLowerCase();
+      return constructor !== 'object' ? constructor : 'object';
+    }
+    
+    return type; // string, number, boolean, undefined, function, etc.
+  }
+
+  /**
    * Compare two objects recursively
    * @param {Object} obj1 - First object
    * @param {Object} obj2 - Second object
@@ -145,40 +167,52 @@ class Comparator {
    * @param {string} path - Current path
    */
   compareValues(val1, val2, path) {
+    // Get specific types
+    const type1 = this.getValueType(val1);
+    const type2 = this.getValueType(val2);
+
     // Check for equivalent values as defined in options
     for (const [key, values] of Object.entries(this.options.equivalentValues)) {
       if (Array.isArray(values) && values.includes(val1) && values.includes(val2)) {
         this.result.addMatchedValue({
           path,
           value: `${val1} ≈ ${val2}`,
+          type1,
+          type2,
           message: `Values considered equivalent by rule "${key}"`
         });
         return;
       }
     }
 
-    // Check types
-    if (this.options.strictTypes && typeof val1 !== typeof val2) {
+    // Check specific types
+    if (type1 !== type2) {
       this.result.addUnmatchedType({
         path,
-        expected: typeof val1,
-        actual: typeof val2,
-        message: 'Types do not match'
+        expected: type1,
+        actual: type2,
+        message: `Types do not match: expected '${type1}', got '${type2}'`
       });
-      return;
+      
+      if (this.options.strictTypes) {
+        return; // Stop comparison if strict type checking is enabled
+      }
     }
 
     // Compare values
     if (val1 === val2) {
       this.result.addMatchedValue({
         path,
-        value: val1
+        value: val1,
+        type: type1 // Since they're equal, type1 and type2 would be the same
       });
     } else {
       this.result.addUnmatchedValue({
         path,
         expected: val1,
         actual: val2,
+        expectedType: type1,
+        actualType: type2,
         message: 'Values do not match'
       });
     }
