@@ -14,13 +14,13 @@ A powerful and flexible library for comparing JSON objects with support for deep
 ## Installation
 
 ```bash
-npm install json-compare
+npm install json-deep-compare
 ```
 
 ## Basic Usage
 
 ```javascript
-const JSONCompare = require('json-compare');
+const JSONCompare = require('json-deep-compare');
 
 // Create objects to compare
 const obj1 = {
