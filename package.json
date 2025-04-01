@@ -1,6 +1,6 @@
 {
   "name": "json-deep-compare",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A powerful library for comparing JSON objects with support for deep comparison, regex validation, and customizable options",
   "main": "dist/index.js",
   "files": [
