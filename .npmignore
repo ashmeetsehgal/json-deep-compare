@@ -1,0 +1,39 @@
+# Source code (since we're publishing the dist folder)
+src/
+
+# Development files
+.github/
+.vscode/
+.git/
+.gitignore
+.eslintrc
+.eslintrc.*
+.editorconfig
+.prettierrc
+.prettierignore
+
+# Test files
+__tests__/
+test/
+tests/
+*.test.js
+*.spec.js
+jest.config.js
+
+# Documentation source
+jsdoc.conf.json
+
+# Build tools
+babel.config.js
+.babelrc
+tsconfig.json
+webpack.config.js
+rollup.config.js
+
+# Examples (these can go in the README instead)
+examples/
+example.js
+
+# Misc
+*.log
+*.tgz

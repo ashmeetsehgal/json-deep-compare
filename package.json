@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "description": "A powerful library for comparing JSON objects with support for deep comparison, regex validation, and customizable options",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "test": "jest",
     "lint": "eslint .",
