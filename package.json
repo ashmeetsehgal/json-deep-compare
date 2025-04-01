@@ -3,8 +3,10 @@
   "version": "1.0.1",
   "description": "A powerful library for comparing JSON objects with support for deep comparison, regex validation, and customizable options",
   "main": "dist/index.js",
+  "types": "types/index.d.ts",
   "files": [
     "dist",
+    "types",
     "LICENSE",
     "README.md"
   ],
@@ -36,9 +38,11 @@
     "@babel/cli": "^7.14.8",
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
+    "@types/node": "^22.13.17",
     "eslint": "^8.2.0",
     "jest": "^27.0.6",
     "jsdoc": "^3.6.7",
-    "terser": "^5.39.0"
+    "terser": "^5.39.0",
+    "typescript": "^5.8.2"
   }
 }

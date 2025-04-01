@@ -1,4 +1,4 @@
-const JSONCompare = require("./index");
+const JSONCompare = require("../index");
 
 // Example objects
 const obj1 = {
