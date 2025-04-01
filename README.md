@@ -1,0 +1,179 @@
+# JSON Compare
+
+A powerful and flexible library for comparing JSON objects with support for deep comparison, regex validation, and customizable options.
+
+## Features
+
+- **Deep Comparison**: Perform a deep comparison of JSON objects, including nested objects and arrays.
+- **Key and Value Type Comparison**: Compare both keys and value types, ensuring that mismatches in types are reported.
+- **Regex Checks**: Validate string values against regex patterns, with support for both exact path matching and key name matching.
+- **Result Structure**: Get results in a structured format that clearly indicates matched keys and values, unmatched keys, unmatched values, and regex check results.
+- **Customizable Options**: Customize the comparison behavior with options for ignoring specific keys, treating certain values as equivalent, and handling different data types.
+- **Performance Optimized**: Designed to efficiently handle large JSON objects.
+
+## Installation
+
+```bash
+npm install json-compare
+```
+
+## Basic Usage
+
+```javascript
+const JSONCompare = require('json-compare');
+
+// Create objects to compare
+const obj1 = {
+  user: {
+    name: "Ashmeet Sehgal",
+    email: "ashmeet@ashmeetsehgal.com",
+    details: {
+      phone: "+91-9876543210"
+    }
+  },
+  products: [
+    { id: "PROD-123", name: "Product 1" }
+  ]
+};
+
+const obj2 = {
+  user: {
+    name: "Ashmeet Sehgal",
+    email: "contact@ashmeetsehgal.com", // Different email
+    details: {
+      phone: "+91-9876543210"
+    }
+  },
+  products: [
+    { id: "PROD-123", name: "Product 1" }
+  ]
+};
+
+// Create a comparator with regex checks
+const comparator = new JSONCompare({
+  regexChecks: {
+    'email': /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    'phone': /\+\d{1,3}-\d{3,14}/,  // Will match any key named 'phone'
+    'products[0].id': /^PROD-\d+$/
+  },
+  matchKeysByName: true // Enable matching by key name for regex checks
+});
+
+// Perform the comparison
+const result = comparator.compareAndValidate(obj1, obj2);
+
+console.log(result);
+```
+
+## Options
+
+You can customize the comparison behavior with the following options:
+
+```javascript
+const options = {
+  // Keys to ignore during comparison
+  ignoredKeys: ['createdAt', 'updatedAt'],
+  
+  // Values to treat as equivalent
+  equivalentValues: {
+    'booleanTypes': [true, 'true', 1],
+    'emptyValues': [null, undefined, '']
+  },
+  
+  // Regex patterns for value validation
+  regexChecks: {
+    'email': /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    'user.details.phone': '\\+\\d{1,3}-\\d{3,14}',  // String pattern
+    'products[0].id': /^PROD-\d+$/
+  },
+  
+  // Whether to strictly compare types
+  strictTypes: true,
+  
+  // Whether to ignore keys in obj2 that aren't in obj1
+  ignoreExtraKeys: false,
+  
+  // Whether to match regex by key name instead of only by path
+  matchKeysByName: true
+};
+
+const comparator = new JSONCompare(options);
+```
+
+## Result Structure
+
+The comparison result has the following structure:
+
+```javascript
+{
+  matched: {
+    keys: [],    // Matched keys
+    values: []   // Matched values
+  },
+  unmatched: {
+    keys: [],    // Keys found in one object but not the other
+    values: [],  // Values that don't match
+    types: []    // Values with mismatched types
+  },
+  regexChecks: {
+    passed: [],  // Values that passed regex validation
+    failed: []   // Values that failed regex validation
+  },
+  summary: {
+    matchPercentage: 0,     // Percentage of matched elements
+    totalKeysCompared: 0,   // Total number of keys compared
+    totalMatched: 0,        // Total number of matched elements
+    totalUnmatched: 0,      // Total number of unmatched elements
+    totalRegexChecks: 0     // Total number of regex checks performed
+  }
+}
+```
+
+## Advanced Usage
+
+### Matching by Key Name
+
+With the `matchKeysByName` option set to `true`, the library will apply regex checks to all keys with matching names, not just exact paths. This is useful for validating all fields of a specific type regardless of their location in the object.
+
+```javascript
+const comparator = new JSONCompare({
+  regexChecks: {
+    'email': /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  },
+  matchKeysByName: true
+});
+
+// This will validate both user.email and customer.email fields
+```
+
+### Treating Values as Equivalent
+
+You can define sets of values that should be treated as equivalent:
+
+```javascript
+const comparator = new JSONCompare({
+  equivalentValues: {
+    'booleanTypes': [true, 'true', 1],
+    'emptyValues': [null, undefined, '']
+  }
+});
+
+// true, 'true', and 1 will be considered equivalent
+// null, undefined, and '' will be considered equivalent
+```
+
+### Ignoring Extra Keys
+
+If you only care about whether obj2 contains all the keys from obj1, you can ignore extra keys:
+
+```javascript
+const comparator = new JSONCompare({
+  ignoreExtraKeys: true
+});
+
+// Keys in obj2 that aren't in obj1 will be ignored
+```
+
+## License
+
+MIT

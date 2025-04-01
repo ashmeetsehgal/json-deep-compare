@@ -1,0 +1,36 @@
+{
+  "name": "json-compare",
+  "version": "1.0.0",
+  "description": "A powerful library for comparing JSON objects with support for deep comparison, regex validation, and customizable options",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint .",
+    "build": "babel src -d dist",
+    "docs": "jsdoc -c jsdoc.conf.json -r"
+  },
+  "keywords": [
+    "json",
+    "compare",
+    "deep",
+    "diff",
+    "object",
+    "comparison",
+    "regex",
+    "validation"
+  ],
+  "author": "Ashmeet Sehgal (ashmeetsehgal.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ashmeetsehgal/json-compare.git"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "eslint": "^8.2.0",
+    "jest": "^27.0.6",
+    "jsdoc": "^3.6.7"
+  }
+}
