@@ -10,6 +10,7 @@ A powerful and flexible library for comparing JSON objects with support for deep
 - **Regex Checks**: Validate string values against regex patterns, with support for both exact path matching and key name matching.
 - **Result Structure**: Get results in a structured format that clearly indicates matched keys and values, unmatched keys, unmatched values, and regex check results.
 - **Customizable Options**: Customize the comparison behavior with options for ignoring specific keys, treating certain values as equivalent, and handling different data types.
+- **TypeScript Support**: Full TypeScript type definitions included for better development experience.
 - **Performance Optimized**: Designed to efficiently handle large JSON objects.
 
 ## Installation
