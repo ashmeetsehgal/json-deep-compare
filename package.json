@@ -2,11 +2,18 @@
   "name": "json-deep-compare",
   "version": "1.0.0",
   "description": "A powerful library for comparing JSON objects with support for deep comparison, regex validation, and customizable options",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "test": "jest",
     "lint": "eslint .",
-    "build": "babel src -d dist",
+    "build": "babel src -d dist && babel index.js -o dist/index.js",
+    "minify": "for file in dist/*.js dist/**/*.js; do if [ -f \"$file\" ]; then terser \"$file\" -c -m -o \"$file\"; fi; done",
+    "prepublishOnly": "npm run build && npm run minify",
     "docs": "jsdoc -c jsdoc.conf.json -r"
   },
   "keywords": [
@@ -31,6 +38,7 @@
     "@babel/preset-env": "^7.15.0",
     "eslint": "^8.2.0",
     "jest": "^27.0.6",
-    "jsdoc": "^3.6.7"
+    "jsdoc": "^3.6.7",
+    "terser": "^5.39.0"
   }
 }
