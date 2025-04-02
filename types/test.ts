@@ -3,7 +3,7 @@
  * It's not meant to be executed, just to check that types are working correctly
  */
 
-import JSONCompare, { JSONCompareOptions, JSONCompareResult } from 'json-deep-compare';
+import JSONCompare, { JSONCompareOptions, JSONCompareResult } from '../src/index';
 
 // Test constructor with options
 const options: JSONCompareOptions = {

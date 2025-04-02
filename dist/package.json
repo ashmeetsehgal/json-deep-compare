@@ -1,0 +1,52 @@
+{
+  "name": "json-deep-compare",
+  "version": "1.0.3",
+  "description": "A powerful library for comparing JSON objects with support for deep comparison, regex validation, and customizable options",
+  "main": "./cjs/index.js",
+  "module": "./esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js",
+      "require": "./cjs/index.js"
+    }
+  },
+  "type": "commonjs",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist",
+    "types",
+    "LICENSE",
+    "README.md"
+  ],
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testEnvironment": "node",
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  },
+  "keywords": [
+    "json",
+    "compare",
+    "deep",
+    "diff",
+    "object",
+    "comparison",
+    "regex",
+    "validation"
+  ],
+  "author": "Ashmeet Sehgal (ashmeetsehgal.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ashmeetsehgal/json-deep-compare.git"
+  }
+}

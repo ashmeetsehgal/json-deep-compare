@@ -31,15 +31,13 @@ class Comparator {
     if (Array.isArray(value)) return 'array';
     if (value instanceof Date) return 'date';
     if (value instanceof RegExp) return 'regex';
-    
     const type = typeof value;
-    
+
     // For objects, we return 'object' unless it's a special built-in object
     if (type === 'object') {
       const constructor = value.constructor.name.toLowerCase();
       return constructor !== 'object' ? constructor : 'object';
     }
-    
     return type; // string, number, boolean, undefined, function, etc.
   }
 
@@ -69,17 +67,15 @@ class Comparator {
 
     // Compare object keys
     const keys1 = Object.keys(obj1).filter(key => !this.options.ignoredKeys.includes(key));
-    
     for (const key of keys1) {
       const newPath = PathUtils.buildPath(path, key);
-      
+
       // Check if key exists in obj2
       if (key in obj2) {
         this.result.addMatchedKey(newPath);
-        
+
         // Check value type/content
-        if (typeof obj1[key] === 'object' && obj1[key] !== null && 
-            typeof obj2[key] === 'object' && obj2[key] !== null) {
+        if (typeof obj1[key] === 'object' && obj1[key] !== null && typeof obj2[key] === 'object' && obj2[key] !== null) {
           // Recursive comparison for nested objects
           this.compareObjects(obj1[key], obj2[key], newPath);
         } else {
@@ -130,8 +126,7 @@ class Comparator {
     const minLength = Math.min(arr1.length, arr2.length);
     for (let i = 0; i < minLength; i++) {
       const newPath = PathUtils.buildArrayPath(path, i);
-      if (typeof arr1[i] === 'object' && arr1[i] !== null && 
-          typeof arr2[i] === 'object' && arr2[i] !== null) {
+      if (typeof arr1[i] === 'object' && arr1[i] !== null && typeof arr2[i] === 'object' && arr2[i] !== null) {
         this.compareObjects(arr1[i], arr2[i], newPath);
       } else {
         this.compareValues(arr1[i], arr2[i], newPath);
@@ -148,7 +143,6 @@ class Comparator {
         message: 'Extra element in first array'
       });
     }
-
     for (let i = minLength; i < arr2.length; i++) {
       const newPath = PathUtils.buildArrayPath(path, i);
       this.result.addUnmatchedValue({
@@ -193,7 +187,6 @@ class Comparator {
         actual: type2,
         message: `Types do not match: expected '${type1}', got '${type2}'`
       });
-      
       if (this.options.strictTypes) {
         return; // Stop comparison if strict type checking is enabled
       }
@@ -207,12 +200,11 @@ class Comparator {
       // Use loose equality (==) for non-strict mode, which will convert types
       valuesMatch = val1 == val2;
     }
-
     if (valuesMatch) {
       this.result.addMatchedValue({
         path,
         value: val1,
-        type: type1 
+        type: type1
       });
     } else {
       this.result.addUnmatchedValue({
@@ -229,5 +221,4 @@ class Comparator {
     this.regexValidator.validateValue(val2, path);
   }
 }
-
 module.exports = Comparator;

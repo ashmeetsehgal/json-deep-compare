@@ -1,1 +1,0 @@
-const JSONCompare=require("./src/JSONCompare");module.exports=JSONCompare,module.exports.default=JSONCompare;

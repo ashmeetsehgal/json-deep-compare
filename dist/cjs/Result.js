@@ -128,20 +128,15 @@ class Result {
    */
   updateSummary() {
     const totalMatched = this.data.matched.keys.length;
-    
+
     // If strictTypes is false, don't count type mismatches as unmatched items
     const strictTypes = this.options.strictTypes !== undefined ? this.options.strictTypes : true;
     const unmatchedTypesCount = strictTypes ? this.data.unmatched.types.length : 0;
-    
-    const totalUnmatched = this.data.unmatched.keys.length + 
-                          this.data.unmatched.values.length + 
-                          unmatchedTypesCount;
-                          
+    const totalUnmatched = this.data.unmatched.keys.length + this.data.unmatched.values.length + unmatchedTypesCount;
     const totalKeysCompared = totalMatched + totalUnmatched;
     const totalRegexChecks = this.data.regexChecks.passed.length + this.data.regexChecks.failed.length;
-
     this.data.summary = {
-      matchPercentage: totalKeysCompared > 0 ? (totalMatched / totalKeysCompared) * 100 : 100,
+      matchPercentage: totalKeysCompared > 0 ? totalMatched / totalKeysCompared * 100 : 100,
       totalKeysCompared,
       totalMatched,
       totalUnmatched,
@@ -157,5 +152,4 @@ class Result {
     return this.data;
   }
 }
-
 module.exports = Result;
