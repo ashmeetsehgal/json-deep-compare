@@ -1,1 +1,5 @@
-npm test
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Build the project first, then run tests
+npm run build && npm test
