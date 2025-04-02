@@ -1,7 +1,7 @@
 /**
  * @fileoverview JSON Compare - A library for deep comparison of JSON objects
  * @author AshmeetSehgal.com
- * @version 1.0.0
+ * @version 1.0.3
  */
 
 const JSONCompare = require('./JSONCompare');

@@ -19,12 +19,15 @@ tests/
 *.test.js
 *.spec.js
 jest.config.js
+types/test.ts
 
 # Documentation source
 jsdoc.conf.json
 
 # Build tools
 babel.config.js
+babel.esm.config.js
+build-index.js
 .babelrc
 tsconfig.json
 webpack.config.js
