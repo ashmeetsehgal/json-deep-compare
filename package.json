@@ -1,8 +1,16 @@
 {
   "name": "json-deep-compare",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "A powerful library for comparing JSON objects with support for deep comparison, regex validation, and customizable options",
-  "main": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "type": "commonjs",
   "types": "types/index.d.ts",
   "files": [
     "dist",
@@ -12,11 +20,25 @@
   ],
   "scripts": {
     "test": "jest",
+    "test:formats": "npm run build && node test/cjs-test.js && node --experimental-modules test/esm-test.mjs",
     "lint": "eslint .",
-    "build": "babel src -d dist && babel index.js -o dist/index.js",
-    "minify": "for file in dist/*.js dist/**/*.js; do if [ -f \"$file\" ]; then terser \"$file\" -c -m -o \"$file\"; fi; done",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:copy-package",
+    "clean": "rm -rf dist",
+    "build:cjs": "mkdir -p dist/cjs && babel src --out-dir dist/cjs",
+    "build:esm": "mkdir -p dist/esm && babel src --out-dir dist/esm --no-babelrc --config-file ./babel.esm.config.js",
+    "build:copy-package": "node -e \"const pkg = require('./package.json'); const distPkg = { ...pkg }; distPkg.main = './cjs/index.js'; distPkg.module = './esm/index.js'; distPkg.exports = { '.': { 'import': './esm/index.js', 'require': './cjs/index.js' } }; delete distPkg.devDependencies; delete distPkg.scripts; require('fs').writeFileSync('./dist/package.json', JSON.stringify(distPkg, null, 2));\"",
+    "minify": "for dir in cjs esm; do for file in dist/$dir/*.js dist/$dir/**/*.js; do if [ -f \"$file\" ]; then terser \"$file\" -c -m -o \"$file\"; fi; done; done",
     "prepublishOnly": "npm run build && npm run minify",
-    "docs": "jsdoc -c jsdoc.conf.json -r"
+    "docs": "jsdoc -c jsdoc.conf.json -r",
+    "prepare": "husky"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testEnvironment": "node",
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
   },
   "keywords": [
     "json",
@@ -37,12 +59,16 @@
   "devDependencies": {
     "@babel/cli": "^7.14.8",
     "@babel/core": "^7.15.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.26.3",
     "@babel/preset-env": "^7.15.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.13.17",
     "eslint": "^8.2.0",
+    "husky": "^9.1.7",
     "jest": "^27.0.6",
     "jsdoc": "^3.6.7",
     "terser": "^5.39.0",
+    "ts-jest": "^27.1.5",
     "typescript": "^5.8.2"
   }
 }

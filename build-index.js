@@ -4,7 +4,7 @@
  * @version 1.0.3
  */
 
-const JSONCompare = require('./src/JSONCompare');
+const JSONCompare = require('./JSONCompare');
 
 // Export as both ES module and CommonJS
 module.exports = JSONCompare;

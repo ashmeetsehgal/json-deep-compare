@@ -4,10 +4,10 @@
  * @version 1.0.3
  */
 
-const Options = require('./Options');
-const Result = require('./Result');
-const RegexValidator = require('./RegexValidator');
-const Comparator = require('./Comparator');
+var Options = require('./Options');
+var Result = require('./Result');
+var RegexValidator = require('./RegexValidator');
+var Comparator = require('./Comparator');
 
 /**
  * Class for comparing JSON objects
@@ -23,7 +23,8 @@ class JSONCompare {
    * @param {boolean} [options.ignoreExtraKeys=false] - Whether to ignore keys in obj2 that aren't in obj1
    * @param {boolean} [options.matchKeysByName=false] - Whether to match regex by key name instead of only by path
    */
-  constructor(options = {}) {
+  constructor() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     this.options = new Options(options);
     this.result = new Result(this.options);
     this.regexValidator = new RegexValidator(this.options, this.result);
@@ -56,5 +57,4 @@ class JSONCompare {
     return this.result.getResult();
   }
 }
-
 module.exports = JSONCompare;

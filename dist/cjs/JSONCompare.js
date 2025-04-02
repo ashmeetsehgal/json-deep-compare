@@ -56,5 +56,4 @@ class JSONCompare {
     return this.result.getResult();
   }
 }
-
 module.exports = JSONCompare;

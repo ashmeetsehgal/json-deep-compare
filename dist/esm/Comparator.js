@@ -3,7 +3,7 @@
  * @author AshmeetSehgal.com
  */
 
-const PathUtils = require('./PathUtils');
+var PathUtils = require('./PathUtils');
 
 /**
  * Class for comparing objects
@@ -31,15 +31,13 @@ class Comparator {
     if (Array.isArray(value)) return 'array';
     if (value instanceof Date) return 'date';
     if (value instanceof RegExp) return 'regex';
-    
-    const type = typeof value;
-    
+    var type = typeof value;
+
     // For objects, we return 'object' unless it's a special built-in object
     if (type === 'object') {
-      const constructor = value.constructor.name.toLowerCase();
-      return constructor !== 'object' ? constructor : 'object';
+      var _constructor = value.constructor.name.toLowerCase();
+      return _constructor !== 'object' ? _constructor : 'object';
     }
-    
     return type; // string, number, boolean, undefined, function, etc.
   }
 
@@ -49,7 +47,10 @@ class Comparator {
    * @param {Object} obj2 - Second object
    * @param {string} path - Current path in the object
    */
-  compareObjects(obj1 = {}, obj2 = {}, path = '') {
+  compareObjects() {
+    var obj1 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var obj2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var path = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
     if (obj1 === null || obj2 === null) {
       this.compareValues(obj1, obj2, path);
       return;
@@ -68,18 +69,16 @@ class Comparator {
     }
 
     // Compare object keys
-    const keys1 = Object.keys(obj1).filter(key => !this.options.ignoredKeys.includes(key));
-    
-    for (const key of keys1) {
-      const newPath = PathUtils.buildPath(path, key);
-      
+    var keys1 = Object.keys(obj1).filter(key => !this.options.ignoredKeys.includes(key));
+    for (var key of keys1) {
+      var newPath = PathUtils.buildPath(path, key);
+
       // Check if key exists in obj2
       if (key in obj2) {
         this.result.addMatchedKey(newPath);
-        
+
         // Check value type/content
-        if (typeof obj1[key] === 'object' && obj1[key] !== null && 
-            typeof obj2[key] === 'object' && obj2[key] !== null) {
+        if (typeof obj1[key] === 'object' && obj1[key] !== null && typeof obj2[key] === 'object' && obj2[key] !== null) {
           // Recursive comparison for nested objects
           this.compareObjects(obj1[key], obj2[key], newPath);
         } else {
@@ -89,20 +88,20 @@ class Comparator {
         this.result.addUnmatchedKey({
           path: newPath,
           value: obj1[key],
-          message: `Key exists in object 1 but not in object 2`
+          message: "Key exists in object 1 but not in object 2"
         });
       }
     }
 
     // Check for extra keys in obj2 if not ignoring them
     if (!this.options.ignoreExtraKeys) {
-      for (const key of Object.keys(obj2)) {
-        if (!this.options.ignoredKeys.includes(key) && !(key in obj1)) {
-          const newPath = PathUtils.buildPath(path, key);
+      for (var _key of Object.keys(obj2)) {
+        if (!this.options.ignoredKeys.includes(_key) && !(_key in obj1)) {
+          var _newPath = PathUtils.buildPath(path, _key);
           this.result.addUnmatchedKey({
-            path: newPath,
-            value: obj2[key],
-            message: `Key exists in object 2 but not in object 1`
+            path: _newPath,
+            value: obj2[_key],
+            message: "Key exists in object 2 but not in object 1"
           });
         }
       }
@@ -120,18 +119,17 @@ class Comparator {
     if (arr1.length !== arr2.length) {
       this.result.addUnmatchedValue({
         path,
-        expected: `Array of length ${arr1.length}`,
-        actual: `Array of length ${arr2.length}`,
+        expected: "Array of length ".concat(arr1.length),
+        actual: "Array of length ".concat(arr2.length),
         message: 'Array lengths do not match'
       });
     }
 
     // Compare array elements
-    const minLength = Math.min(arr1.length, arr2.length);
-    for (let i = 0; i < minLength; i++) {
-      const newPath = PathUtils.buildArrayPath(path, i);
-      if (typeof arr1[i] === 'object' && arr1[i] !== null && 
-          typeof arr2[i] === 'object' && arr2[i] !== null) {
+    var minLength = Math.min(arr1.length, arr2.length);
+    for (var i = 0; i < minLength; i++) {
+      var newPath = PathUtils.buildArrayPath(path, i);
+      if (typeof arr1[i] === 'object' && arr1[i] !== null && typeof arr2[i] === 'object' && arr2[i] !== null) {
         this.compareObjects(arr1[i], arr2[i], newPath);
       } else {
         this.compareValues(arr1[i], arr2[i], newPath);
@@ -139,22 +137,21 @@ class Comparator {
     }
 
     // Report extra elements
-    for (let i = minLength; i < arr1.length; i++) {
-      const newPath = PathUtils.buildArrayPath(path, i);
+    for (var _i = minLength; _i < arr1.length; _i++) {
+      var _newPath2 = PathUtils.buildArrayPath(path, _i);
       this.result.addUnmatchedValue({
-        path: newPath,
-        expected: arr1[i],
+        path: _newPath2,
+        expected: arr1[_i],
         actual: undefined,
         message: 'Extra element in first array'
       });
     }
-
-    for (let i = minLength; i < arr2.length; i++) {
-      const newPath = PathUtils.buildArrayPath(path, i);
+    for (var _i2 = minLength; _i2 < arr2.length; _i2++) {
+      var _newPath3 = PathUtils.buildArrayPath(path, _i2);
       this.result.addUnmatchedValue({
-        path: newPath,
+        path: _newPath3,
         expected: undefined,
-        actual: arr2[i],
+        actual: arr2[_i2],
         message: 'Extra element in second array'
       });
     }
@@ -168,18 +165,18 @@ class Comparator {
    */
   compareValues(val1, val2, path) {
     // Get specific types
-    const type1 = this.getValueType(val1);
-    const type2 = this.getValueType(val2);
+    var type1 = this.getValueType(val1);
+    var type2 = this.getValueType(val2);
 
     // Check for equivalent values as defined in options
-    for (const [key, values] of Object.entries(this.options.equivalentValues)) {
+    for (var [key, values] of Object.entries(this.options.equivalentValues)) {
       if (Array.isArray(values) && values.includes(val1) && values.includes(val2)) {
         this.result.addMatchedValue({
           path,
-          value: `${val1} ≈ ${val2}`,
+          value: "".concat(val1, " \u2248 ").concat(val2),
           type1,
           type2,
-          message: `Values considered equivalent by rule "${key}"`
+          message: "Values considered equivalent by rule \"".concat(key, "\"")
         });
         return;
       }
@@ -191,28 +188,26 @@ class Comparator {
         path,
         expected: type1,
         actual: type2,
-        message: `Types do not match: expected '${type1}', got '${type2}'`
+        message: "Types do not match: expected '".concat(type1, "', got '").concat(type2, "'")
       });
-      
       if (this.options.strictTypes) {
         return; // Stop comparison if strict type checking is enabled
       }
     }
 
     // Compare values - use strict equality for strict mode, loose equality for non-strict mode
-    let valuesMatch;
+    var valuesMatch;
     if (this.options.strictTypes) {
       valuesMatch = val1 === val2;
     } else {
       // Use loose equality (==) for non-strict mode, which will convert types
       valuesMatch = val1 == val2;
     }
-
     if (valuesMatch) {
       this.result.addMatchedValue({
         path,
         value: val1,
-        type: type1 
+        type: type1
       });
     } else {
       this.result.addUnmatchedValue({
@@ -229,5 +224,4 @@ class Comparator {
     this.regexValidator.validateValue(val2, path);
   }
 }
-
 module.exports = Comparator;
