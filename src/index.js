@@ -1,7 +1,6 @@
 /**
  * @fileoverview Main entry point for JSON Compare
  * @author AshmeetSehgal.com
- * @version 1.0.5
  */
 
 const JSONCompare = require('./JSONCompare');

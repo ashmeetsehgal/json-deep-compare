@@ -1,7 +1,7 @@
 /**
  * @fileoverview Main JSONCompare class
  * @author AshmeetSehgal.com
- * @version 1.0.3
+ * @description This class provides methods to compare JSON objects with various options for customization.
  */
 
 const Options = require('./Options');
