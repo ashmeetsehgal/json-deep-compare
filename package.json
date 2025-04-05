@@ -34,14 +34,6 @@
     "docs": "jsdoc -c jsdoc.conf.json -r",
     "prepare": "husky"
   },
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testEnvironment": "node",
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
-  },
   "keywords": [
     "json",
     "compare",

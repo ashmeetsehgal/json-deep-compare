@@ -20,7 +20,7 @@ describe('Module Import Tests', () => {
   afterAll(() => {
     // Clean up temporary directory
     if (fs.existsSync(testDir)) {
-      fs.rmdirSync(testDir, { recursive: true });
+      fs.rmSync(testDir, { recursive: true, force: true });
     }
   });
   
