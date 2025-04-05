@@ -1,6 +1,8 @@
 /**
  * @fileoverview Example demonstrating TypeScript usage with JSONCompare
  * @author AshmeetSehgal.com
+ * Try this example online in the interactive playground:
+ * https://ashmeetsehgal.com/tools/json-compare
  */
 
 import JSONCompare, { JSONCompareOptions, JSONCompareResult } from '../index';
@@ -41,8 +43,8 @@ const expectedResponse: ApiResponse = {
   data: {
     user: {
       id: 5678,
-      name: "Alex Johnson",
-      email: "alex@example.com",
+      name: "Ashmeet Sehgal",
+      email: "ashmeet@ashmeetsehgal.com",
       role: "admin",
       metadata: {
         lastLogin: "2025-03-30T12:00:00Z",
@@ -70,8 +72,8 @@ const actualResponse = {
   data: {
     user: {
       id: "5678", // String instead of number
-      name: "Alex Johnson",
-      email: "alex@example.com",
+      name: "Ashmeet Sehgal",
+      email: "ashmeet@ashmeetsehgal.com",
       role: "admin",
       metadata: {
         lastLogin: "2025-03-30T12:00:00Z",

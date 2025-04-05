@@ -1,6 +1,18 @@
-# JSON Compare
+# JSON Deep Compare with Field Validator
 
 A powerful and flexible library for comparing JSON objects with support for deep comparison, regex validation, and customizable options.
+
+## Playground
+
+Try before you implement! Test the library's capabilities and experiment with different comparison options using our interactive playground:
+
+**[JSON Deep Compare Playground](https://ashmeetsehgal.com/tools/json-compare)**
+
+The playground allows you to:
+- Compare JSON objects in real-time
+- Customize comparison options
+- Visualize match results and differences
+- Test regex validations
 
 ## Features
 

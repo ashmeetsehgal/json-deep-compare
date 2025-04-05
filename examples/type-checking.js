@@ -1,6 +1,8 @@
 /**
  * @fileoverview Example demonstrating JSONCompare with type checking
  * @author AshmeetSehgal.com
+ * Try this example online in the interactive playground:
+ * https://ashmeetsehgal.com/tools/json-compare
  */
 
 const JSONCompare = require('../index');

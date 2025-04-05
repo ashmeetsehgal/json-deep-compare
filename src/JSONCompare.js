@@ -2,6 +2,7 @@
  * @fileoverview Main JSONCompare class
  * @author AshmeetSehgal.com
  * @description This class provides methods to compare JSON objects with various options for customization.
+ * @see https://ashmeetsehgal.com/tools/json-compare - Try the interactive playground
  */
 
 const Options = require('./Options');
