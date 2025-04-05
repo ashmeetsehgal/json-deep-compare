@@ -1,6 +1,7 @@
 /**
  * Type definitions for json-deep-compare
  * @author AshmeetSehgal.com
+ * @see https://ashmeetsehgal.com/tools/json-compare - Try the interactive playground
  */
 
 declare module 'json-deep-compare' {

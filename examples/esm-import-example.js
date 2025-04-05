@@ -1,6 +1,8 @@
 /**
  * @fileoverview Example demonstrating ES Module import with JSONCompare
  * @author AshmeetSehgal.com
+ * Try this example online in the interactive playground:
+ * https://ashmeetsehgal.com/tools/json-compare
  */
 
 // ESM import example
