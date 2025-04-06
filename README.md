@@ -1,5 +1,7 @@
 # JSON Deep Compare with Field Validator
 
+![JSON Deep Compare](./deep-json-compare.png)
+
 [![Test](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/test.yml/badge.svg)](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/test.yml)
 [![Code Coverage](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/coverage.yml/badge.svg)](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/coverage.yml)
 [![Pull Request Validation](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/pr-validation.yml/badge.svg)](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/pr-validation.yml)
