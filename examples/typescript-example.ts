@@ -5,7 +5,33 @@
  * https://ashmeetsehgal.com/tools/json-compare
  */
 
-import JSONCompare, { JSONCompareOptions, JSONCompareResult } from '../index';
+import JSONCompare from '../index';
+
+// Define the JSONCompareOptions interface locally
+interface JSONCompareOptions {
+  ignoredKeys?: string[];
+  equivalentValues?: Record<string, any[]>;
+  regexChecks?: Record<string, RegExp>;
+  matchKeysByName?: boolean;
+  strictTypes?: boolean;
+  ignoreExtraKeys?: boolean;
+}
+
+// Define the JSONCompareResult interface locally
+interface JSONCompareResult {
+  summary: {
+    matchPercentage: number;
+    totalKeysCompared: number;
+    totalMatched: number;
+    totalUnmatched: number;
+    totalRegexChecks: number;
+  };
+  unmatched: {
+    keys: Array<{ path: string }>;
+    types: Array<{ path: string; expected: any; actual: any }>;
+    values: Array<{ path: string; expected: any; actual: any }>;
+  };
+}
 
 // Define interfaces for our data structures
 interface User {
