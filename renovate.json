@@ -1,7 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:base",
+    ":maintainLockFilesWeekly",
+    ":semanticCommits",
+    ":dependencyDashboard"
   ],
   "packageRules": [
     {
@@ -11,9 +14,26 @@
       "groupSlug": "ts-jest-deps",
       "packagePatterns": ["^@types/jest$", "^typescript$"],
       "enabled": true
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "devDependencies (non-major)",
+      "automerge": true
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "dependencies (patch)",
+      "automerge": true
     }
   ],
   "rangeStrategy": "pin",
-  "ignoreDeps": [],
-  "schedule": ["every weekend"]
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["@ashmeetsehgal"]
+  },
+  "schedule": ["every weekend"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2
 }
