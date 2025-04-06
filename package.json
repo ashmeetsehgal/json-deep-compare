@@ -51,6 +51,16 @@
     "type": "git",
     "url": "https://github.com/ashmeetsehgal/json-deep-compare.git"
   },
+  "bundlesize": [
+    {
+      "path": "./dist/cjs/*.js",
+      "maxSize": "10 kB"
+    },
+    {
+      "path": "./dist/esm/*.js",
+      "maxSize": "10 kB"
+    }
+  ],
   "devDependencies": {
     "@babel/cli": "^7.14.8",
     "@babel/core": "^7.15.0",
@@ -64,6 +74,7 @@
     "jsdoc": "^3.6.7",
     "terser": "^5.39.0",
     "ts-jest": "^27.1.5",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "bundlesize": "^0.18.1"
   }
 }
