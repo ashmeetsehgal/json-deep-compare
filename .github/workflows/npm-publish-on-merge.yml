@@ -1,5 +1,5 @@
 # This workflow triggers when code is merged to main branch
-# It runs tests and then offers an option to publish to npm
+# It runs tests and then either automatically publishes to npm or asks for approval first
 
 name: Publish to npm on merge
 
@@ -7,6 +7,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      auto_publish:
+        description: 'Automatically publish without approval'
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build-and-test:
@@ -23,6 +30,10 @@ jobs:
   security-checks:
     needs: build-and-test
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write  # Required for CodeQL
+      contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,6 +42,13 @@ jobs:
       - run: npm ci
       - name: Run npm audit
         run: npm audit --production
+      # CodeQL Analysis
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
       - name: Check for vulnerable dependencies
         uses: snyk/actions/node@master
         continue-on-error: true # Don't fail the build, but report issues
@@ -44,6 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       has_version_changed: ${{ steps.version_check.outputs.has_changed }}
+      current_version: ${{ steps.version_check.outputs.current_version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,6 +73,7 @@ jobs:
         run: |
           # Get current package.json version
           CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
           # Get the package.json from the previous commit on main
           git checkout HEAD~1 -- package.json
@@ -69,18 +89,37 @@ jobs:
             echo "has_changed=false" >> $GITHUB_OUTPUT
           fi
 
-  publish-approval:
+  publish-options:
     needs: check-version-bump
     if: needs.check-version-bump.outputs.has_version_changed == 'true'
     runs-on: ubuntu-latest
+    steps:
+      - name: Set deployment options
+        run: echo "Version change detected. Publishing options available."
+      - name: Auto publishing
+        if: github.event.inputs.auto_publish == 'true'
+        run: echo "Auto-publishing enabled. Package will be published automatically."
+      - name: Manual approval
+        if: github.event.inputs.auto_publish != 'true'
+        run: echo "Package is ready for publishing. You can approve the deployment in the next step."
+
+  publish-with-approval:
+    needs: publish-options
+    if: github.event.inputs.auto_publish != 'true'
+    runs-on: ubuntu-latest
     environment: npm-publish
     steps:
-      - name: Ready to publish
-        run: echo "Package is ready to publish. Awaiting manual approval."
+      - name: Approval notification
+        run: echo "Publishing approved for version ${{ needs.check-version-bump.outputs.current_version }}"
 
   publish-npm:
-    needs: publish-approval
+    needs: [check-version-bump, publish-options]
+    if: |
+      always() && 
+      needs.check-version-bump.outputs.has_version_changed == 'true' && 
+      (github.event.inputs.auto_publish == 'true' || success())
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.auto_publish == 'true' && '' || 'npm-publish' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -91,11 +130,21 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+      - name: Package published
+        run: echo "🎉 Package version ${{ needs.check-version-bump.outputs.current_version }} published to npm!"
 
-  auto-publish-option:
+  no-version-change:
     needs: check-version-bump
     if: needs.check-version-bump.outputs.has_version_changed == 'false'
     runs-on: ubuntu-latest
     steps:
       - name: No version change detected
-        run: echo "No version change was detected in package.json. If you still want to publish, you can create a release manually."
+        run: echo "⚠️ No version change was detected in package.json. If you still want to publish, you need to update the version number first."
+      - name: Manual publish option
+        run: |
+          echo "To manually publish without changing the version:"
+          echo "1. Go to Actions tab"
+          echo "2. Select this workflow"
+          echo "3. Click 'Run workflow'"
+          echo "4. Enable 'Automatically publish without approval'"
+          echo "5. Click 'Run workflow'"
