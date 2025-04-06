@@ -1,0 +1,19 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["ts-jest"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "groupName": "ts-jest dependencies",
+      "groupSlug": "ts-jest-deps",
+      "packagePatterns": ["^@types/jest$", "^typescript$"],
+      "enabled": true
+    }
+  ],
+  "rangeStrategy": "pin",
+  "ignoreDeps": [],
+  "schedule": ["every weekend"]
+}
