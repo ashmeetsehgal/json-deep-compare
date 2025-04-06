@@ -45,25 +45,45 @@
     "regex",
     "validation"
   ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "author": "Ashmeet Sehgal (ashmeetsehgal.com)",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/ashmeetsehgal/json-deep-compare.git"
   },
+  "bugs": {
+    "url": "https://github.com/ashmeetsehgal/json-deep-compare/issues"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/ashmeetsehgal"
+  },
+  "bundlesize": [
+    {
+      "path": "./dist/cjs/*.js",
+      "maxSize": "10 kB"
+    },
+    {
+      "path": "./dist/esm/*.js",
+      "maxSize": "10 kB"
+    }
+  ],
   "devDependencies": {
     "@babel/cli": "^7.14.8",
     "@babel/core": "^7.15.0",
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
     "@babel/preset-env": "^7.15.0",
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^27.5.2",
     "@types/node": "^22.13.17",
     "eslint": "^8.2.0",
     "husky": "^9.1.7",
     "jest": "^27.0.6",
-    "jsdoc": "^3.6.7",
+    "jsdoc": "^4.0.4",
     "terser": "^5.39.0",
     "ts-jest": "^27.1.5",
-    "typescript": "^5.8.2"
+    "typescript": "^4.9.5"
   }
 }

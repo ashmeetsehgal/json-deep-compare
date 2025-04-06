@@ -1,0 +1,101 @@
+# This workflow triggers when code is merged to main branch
+# It runs tests and then offers an option to publish to npm
+
+name: Publish to npm on merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:full
+      
+  security-checks:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Run npm audit
+        run: npm audit --production
+      - name: Check for vulnerable dependencies
+        uses: snyk/actions/node@master
+        continue-on-error: true # Don't fail the build, but report issues
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  check-version-bump:
+    needs: [build-and-test, security-checks]
+    runs-on: ubuntu-latest
+    outputs:
+      has_version_changed: ${{ steps.version_check.outputs.has_changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for comparing versions
+      
+      - id: version_check
+        name: Check if version has changed
+        run: |
+          # Get current package.json version
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+          # Get the package.json from the previous commit on main
+          git checkout HEAD~1 -- package.json
+          PREVIOUS_VERSION=$(node -p "require('./package.json').version")
+          git checkout HEAD -- package.json
+          
+          # Compare versions
+          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "Version changed: $PREVIOUS_VERSION -> $CURRENT_VERSION"
+            echo "has_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version unchanged: $CURRENT_VERSION"
+            echo "has_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+  publish-approval:
+    needs: check-version-bump
+    if: needs.check-version-bump.outputs.has_version_changed == 'true'
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    steps:
+      - name: Ready to publish
+        run: echo "Package is ready to publish. Awaiting manual approval."
+
+  publish-npm:
+    needs: publish-approval
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
+  auto-publish-option:
+    needs: check-version-bump
+    if: needs.check-version-bump.outputs.has_version_changed == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: No version change detected
+        run: echo "No version change was detected in package.json. If you still want to publish, you can create a release manually."

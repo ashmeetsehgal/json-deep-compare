@@ -1,2 +1,2 @@
-# Build the project first, then run tests
-npm run build && npm test
+npm run lint
+npm test

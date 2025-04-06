@@ -20,7 +20,12 @@ describe('Package Integrity Tests', () => {
     expect(fs.existsSync(cjsIndexPath)).toBe(true);
     
     const cjsIndexContent = fs.readFileSync(cjsIndexPath, 'utf-8');
-    expect(cjsIndexContent).toContain("require('./JSONCompare')");
+    // Modified test to handle minified format which might have quotes and no spaces
+    expect(
+      cjsIndexContent.includes("require('./JSONCompare')") || 
+      cjsIndexContent.includes("require(\"./JSONCompare\")") ||
+      cjsIndexContent.includes("require('./JSONCompare')")
+    ).toBe(true);
     expect(cjsIndexContent).not.toContain("require('./src/");
     expect(cjsIndexContent).not.toContain("require('../src/");
 
