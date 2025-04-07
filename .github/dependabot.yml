@@ -12,3 +12,5 @@ updates:
       interval: weekly
       time: '20:45'
     open-pull-requests-limit: 3
+    pull-request-update-strategy:
+      compatibility-score-threshold: 75
