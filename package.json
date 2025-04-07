@@ -1,6 +1,6 @@
 {
   "name": "json-deep-compare",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A powerful library for comparing JSON objects with support for deep comparison, regex validation, and customizable options",
   "homepage": "https://ashmeetsehgal.com/tools/json-compare",
   "main": "dist/cjs/index.js",
@@ -28,7 +28,7 @@
     "clean": "rm -rf dist",
     "build:cjs": "mkdir -p dist/cjs && babel src --out-dir dist/cjs",
     "build:esm": "mkdir -p dist/esm && babel src --out-dir dist/esm --no-babelrc --config-file ./babel.esm.config.js",
-    "build:copy-package": "node -e \"const pkg = require('./package.json'); const distPkg = { ...pkg }; distPkg.main = './cjs/index.js'; distPkg.module = './esm/index.js'; distPkg.exports = { '.': { 'import': './esm/index.js', 'require': './cjs/index.js' } }; distPkg.types = '../types/index.d.ts'; distPkg.files = ['LICENSE', 'README.md']; delete distPkg.devDependencies; delete distPkg.scripts; require('fs').writeFileSync('./dist/package.json', JSON.stringify(distPkg, null, 2));\"",
+    "build:copy-package": "node -e \"const pkg = require('./package.json'); const distPkg = { ...pkg }; distPkg.name = 'json-deep-compare'; distPkg.main = './cjs/index.js'; distPkg.module = './esm/index.js'; distPkg.exports = { '.': { 'import': './esm/index.js', 'require': './cjs/index.js' } }; distPkg.types = '../types/index.d.ts'; distPkg.files = ['LICENSE', 'README.md']; delete distPkg.devDependencies; delete distPkg.scripts; if (distPkg.publishConfig) delete distPkg.publishConfig; require('fs').writeFileSync('./dist/package.json', JSON.stringify(distPkg, null, 2));\"",
     "build:copy-types": "mkdir -p dist/types && cp -r types/* dist/types/",
     "minify": "for dir in cjs esm; do for file in dist/$dir/*.js dist/$dir/**/*.js; do if [ -f \"$file\" ]; then terser \"$file\" -c -m -o \"$file\"; fi; done; done",
     "prepublishOnly": "npm run build:full",

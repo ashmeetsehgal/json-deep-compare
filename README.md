@@ -41,6 +41,8 @@ The playground allows you to:
 npm install json-deep-compare
 ```
 
+You can also install from GitHub Packages. See [Publishing Documentation](./docs/npm-publishing.md) for details.
+
 ## Basic Usage
 
 ```javascript

@@ -1,0 +1,86 @@
+name: Publish Package
+
+on:
+  # Trigger on release creation
+  release:
+    types: [created]
+  # Also trigger on pushes to main that include a version change
+  push:
+    branches:
+      - main
+
+jobs:
+  check-version-change:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    outputs:
+      version_changed: ${{ steps.check.outputs.version_changed }}
+      new_version: ${{ steps.check.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: check
+        name: Check if package.json version changed
+        run: |
+          git diff HEAD^ HEAD --name-only | grep "package.json" || echo "No changes to package.json"
+          
+          # Get the previous version
+          PREV_VERSION=$(git show HEAD^:package.json | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
+          
+          # Get the current version
+          CURRENT_VERSION=$(grep -o '"version": "[^"]*"' package.json | cut -d'"' -f4)
+          
+          echo "Previous version: $PREV_VERSION"
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Compare versions
+          if [ "$PREV_VERSION" != "$CURRENT_VERSION" ]; then
+            echo "Version changed from $PREV_VERSION to $CURRENT_VERSION"
+            echo "::set-output name=version_changed::true"
+            echo "::set-output name=new_version::$CURRENT_VERSION"
+          else
+            echo "Version unchanged"
+            echo "::set-output name=version_changed::false"
+            echo "::set-output name=new_version::$CURRENT_VERSION"
+          fi
+
+  build-and-publish:
+    runs-on: ubuntu-latest
+    needs: [check-version-change]
+    # Run this job if it's triggered by a release or if version changed in package.json
+    if: github.event_name == 'release' || needs.check-version-change.outputs.version_changed == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org/'
+      - run: npm ci
+      - run: npm run build
+
+      # Publish to npm first
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Configure for GitHub Packages and publish there too
+      - name: Setup for GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          scope: '@ashmeetsehgal'
+      - name: Prepare package.json for GitHub Packages
+        run: |
+          # Use jq to modify the package.json
+          jq '.name = "@ashmeetsehgal/json-deep-compare" | .publishConfig.registry = "https://npm.pkg.github.com"' package.json > package.github.json
+          mv package.github.json package.json
+      - name: Publish to GitHub Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
