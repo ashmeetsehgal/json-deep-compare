@@ -12,4 +12,3 @@ updates:
       interval: weekly
       time: '20:45'
     open-pull-requests-limit: 3
-    compatibility-score: 75
