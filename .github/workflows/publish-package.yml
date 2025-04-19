@@ -62,25 +62,8 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      # Publish to npm first
+      # Publish to npm
       - name: Publish to npm
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # Configure for GitHub Packages and publish there too
-      - name: Setup for GitHub Packages
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
-          registry-url: 'https://npm.pkg.github.com/'
-          scope: '@ashmeetsehgal'
-      - name: Prepare package.json for GitHub Packages
-        run: |
-          # Use jq to modify the package.json
-          jq '.name = "@ashmeetsehgal/json-deep-compare" | .publishConfig.registry = "https://npm.pkg.github.com"' package.json > package.github.json
-          mv package.github.json package.json
-      - name: Publish to GitHub Packages
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
