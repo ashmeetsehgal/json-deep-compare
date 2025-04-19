@@ -5,6 +5,7 @@
 [![Test](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/test.yml/badge.svg)](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/test.yml)
 [![Code Coverage](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/coverage.yml/badge.svg)](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/coverage.yml)
 [![Pull Request Validation](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/pr-validation.yml/badge.svg)](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/pr-validation.yml)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/ashmeetsehgal/json-deep-compare?utm_source=oss&utm_medium=github&utm_campaign=ashmeetsehgal%2Fjson-deep-compare&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![Publish to npm on merge](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/npm-publish-on-merge.yml/badge.svg)](https://github.com/ashmeetsehgal/json-deep-compare/actions/workflows/npm-publish-on-merge.yml)
 [![NPM Version](https://img.shields.io/npm/v/json-deep-compare.svg)](https://www.npmjs.com/package/json-deep-compare)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/ashmeetsehgal/json-deep-compare/blob/main/LICENSE)
