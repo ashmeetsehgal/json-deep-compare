@@ -16,6 +16,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const core = require('@actions/core');
             const { payload } = context;
             const prBody = payload.pull_request.body || '';
             
@@ -35,9 +36,15 @@ jobs:
               issues.push(`PR description is too short. It should have at least 40 characters or 10 words. Current: ${charCount} characters, ${wordCount} words.`);
             }
             
-            // Check for required sections - only Description is mandatory
+            // Check for required sections - Description and Testing are mandatory
             if (!prBody.includes('## Description')) {
               issues.push(`Missing required section: "## Description"`);
+            }
+            
+            // Testing section is mandatory
+            const testingSection = prBody.match(/## How Has This Been Tested\?[\s\S]*?(?=##|$)/);
+            if (!testingSection) {
+              issues.push(`Missing required section: "## How Has This Been Tested?"`);
             }
             
             // For the "Type of change" section, at least one option must be selected if the section exists
