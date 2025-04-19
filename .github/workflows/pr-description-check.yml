@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Check PR Description Length and Checklists
         id: pr-description-check
-        uses: actions/github-script@v7.3.1
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
