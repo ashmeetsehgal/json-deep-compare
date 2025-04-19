@@ -1,0 +1,106 @@
+name: PR Description Check
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, ready_for_review]
+
+jobs:
+  check-pr-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Description Length and Checklists
+        id: pr-description-check
+        uses: actions/github-script@v7.3.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const core = require('@actions/core');
+            const { payload } = context;
+            const prBody = payload.pull_request.body || '';
+            
+            // Function to count words (split by whitespace and filter out empty strings)
+            const countWords = (text) => {
+              return text.split(/\s+/).filter(Boolean).length;
+            };
+            
+            // Validation results
+            const issues = [];
+            
+            // Check minimum characters (40) or words (10)
+            const charCount = prBody.length;
+            const wordCount = countWords(prBody);
+            
+            if (charCount < 40 && wordCount < 10) {
+              issues.push(`PR description is too short. It should have at least 40 characters or 10 words. Current: ${charCount} characters, ${wordCount} words.`);
+            }
+            
+            // Check for required sections - Description and Testing are mandatory
+            if (!/##\s+Description/i.test(prBody)) {
+              issues.push(`Missing required section: "## Description"`);
+            }
+            
+            // Testing section is mandatory
+            const testingSection = prBody.match(/##\s+How\s+Has\s+This\s+Been\s+Tested\?/i);
+            if (!testingSection) {
+              issues.push(`Missing required section: "## How Has This Been Tested?"`);
+            }
+            
+            // For the "Type of change" section, at least one option must be selected if the section exists
+            const typeOfChangeSection = prBody.match(/##\s+Type\s+of\s+change[\s\S]*?(?=##|$)/i);
+            if (typeOfChangeSection && typeOfChangeSection[0]) {
+              const typeSection = typeOfChangeSection[0];
+              const typeCheckboxes = typeSection.match(/- \[[xX]\]/g) || [];
+              if (typeCheckboxes.length === 0) {
+                issues.push(`At least one "Type of change" option must be selected.`);
+              }
+            }
+            
+            // For the "How Has This Been Tested?" section, manual testing is mandatory
+            // and at least one of the first two options must be selected if the section exists
+            const testingSectionContent = prBody.match(/##\s+How\s+Has\s+This\s+Been\s+Tested\?[\s\S]*?(?=##|$)/i);
+            if (testingSectionContent && testingSectionContent[0]) {
+              const testSection = testingSectionContent[0];
+              
+              // Check if Manual Testing is checked
+              const manualTestingChecked = /- \[[xX]\] Manual testing/i.test(testSection);
+              if (!manualTestingChecked) {
+                issues.push(`"Manual testing" checkbox must be checked in the "How Has This Been Tested?" section.`);
+              }
+              
+              // Check if at least one of the first two testing methods is checked
+              const unitTestsChecked = /- \[[xX]\] Unit tests added\/updated/i.test(testSection);
+              const examplesTestChecked = /- \[[xX]\] Tested with existing examples/i.test(testSection);
+              
+              if (!unitTestsChecked && !examplesTestChecked) {
+                issues.push(`At least one automated testing method (Unit tests or Testing with examples) must be selected in the "How Has This Been Tested?" section.`);
+              }
+            }
+            
+            // For the "Checklist" section, all items must be checked
+            const checklistSection = prBody.match(/##\s+Checklist:[\s\S]*?(?=##|$)/i);
+            if (checklistSection && checklistSection[0]) {
+              const checklist = checklistSection[0];
+              const checkboxes = checklist.match(/- \[[ xX]\]/g) || [];
+              const uncheckedBoxes = checklist.match(/- \[ \]/g) || [];
+              
+              if (checkboxes.length > 0 && uncheckedBoxes.length > 0) {
+                issues.push(`All checklist items must be checked. Found ${uncheckedBoxes.length} unchecked item(s) in the Checklist section.`);
+              }
+            }
+            
+            // Output result
+            if (issues.length > 0) {
+              const errorMessage = `## PR Description Issues\n\n${issues.map(issue => `- ${issue}`).join('\n')}`;
+              core.setFailed(errorMessage);
+              
+              // Post comment on PR
+              const { owner, repo, number } = context.issue;
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: number,
+                body: errorMessage
+              });
+            } else {
+              console.log('PR description meets all requirements! ✅');
+            }

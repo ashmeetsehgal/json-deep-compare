@@ -2,7 +2,7 @@
 
 /**
  * Script to publish package to npm
- * Usage: node scripts/publish-packages.js [--dry-run]
+ * Usage: node scripts/publish-package.js [--dry-run]
  */
 
 const fs = require('fs');

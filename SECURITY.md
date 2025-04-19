@@ -14,7 +14,7 @@ The following versions of json-deep-compare are currently supported with securit
 We take the security of json-deep-compare seriously. If you believe you've found a security vulnerability, please follow these steps:
 
 1. **Do not disclose the vulnerability publicly**
-2. **Email the details to [INSERT YOUR CONTACT EMAIL]**
+2. **Email the details to contact@ashmeetsehgal.com**
    - Describe the vulnerability and how it might be exploited
    - Include steps to reproduce if possible
    - Mention your GitHub username if you'd like to be credited
