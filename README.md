@@ -127,6 +127,111 @@ const options = {
 const comparator = new JSONCompare(options);
 ```
 
+## Customizing Array Comparison
+
+The `arrayComparisonStrategies` option provides fine-grained control over how arrays at specific JSON paths are compared. This is an object where keys are path strings (e.g., `"users"`, `"products[0].items"`) pointing to arrays in your JSON structure, and values are strategy objects that define the comparison method.
+
+### Available Strategies
+
+#### 1. Exact Comparison (Default)
+*   **Strategy Object**: `{ type: 'exact' }`
+*   **Description**: This is the default behavior if no specific strategy is defined for an array path. Arrays must have the same length, and elements must be in the same order. Corresponding elements are then compared recursively.
+*   **Differences Reported**: Length mismatches, value/type differences at specific indices.
+
+#### 2. Set Comparison
+*   **Strategy Object**: `{ type: 'set' }`
+*   **Description**: This strategy treats arrays as unordered sets. Both arrays must have the same length and contain the same elements, but the order of elements does not matter. The frequency of each distinct element must be the same in both arrays.
+*   **Example**:
+    ```javascript
+    // obj1 = { tags: [1, 2, 2, 3] }
+    // obj2 = { tags: [3, 1, 2, 2] }
+    // With arrayComparisonStrategies: { 'tags': { type: 'set' } } -> these would match.
+    
+    // obj1 = { tags: [1, 2, 3] }
+    // obj2 = { tags: [1, 2, 4] }
+    // With set strategy -> reports element '3' missing from obj2 and '4' as extra in obj2 (or count differences).
+    ```
+*   **Differences Reported**: Array length mismatches, element count differences (e.g., "Element 'X' count: 2 in obj1, count: 1 in obj2").
+
+#### 3. Key-Based Comparison
+*   **Strategy Object**: `{ type: 'key', keyName: 'yourKey' }` (e.g., `keyName: 'id'`)
+*   **Description**: This strategy is designed for comparing arrays of objects, where each object can be uniquely identified by the value of one of its properties (specified by `keyName`). Objects from both arrays are paired based on this key. The order of objects in the arrays does not matter, and the arrays can be of different lengths. Once paired, the objects themselves are recursively compared.
+*   **Example**:
+    ```javascript
+    // obj1 = { users: [ {id:1, name:'Alice'}, {id:2, name:'Bob'} ] }
+    // obj2 = { users: [ {id:2, name:'Bob'}, {id:1, name:'Alice'} ] }
+    // With arrayComparisonStrategies: { 'users': { type: 'key', keyName: 'id' } } -> match.
+    
+    // obj1 = { items: [ {itemId:'A', val:10} ] }
+    // obj2 = { items: [ {itemId:'A', val:10}, {itemId:'B', val:20} ] }
+    // With key strategy for 'items' (keyName: 'itemId') -> reports item with itemId:'B' as extra in obj2.
+    ```
+*   **Differences Reported**:
+    *   Differences within matched objects (e.g., `users[id=1].name` mismatch).
+    *   Objects present in one array but not the other (reported by their key, e.g., "Element with key 'X' exists in first array...").
+    *   Structural issues like missing `keyName` property in an object, or duplicate `keyName` values within the same array.
+    *   The path for differences within keyed objects is typically reported as `arrayName[keyName=keyValue].propertyName`.
+
+### Example Usage of `arrayComparisonStrategies`
+
+```javascript
+const JSONCompare = require('json-deep-compare'); // or import via ES6 modules
+
+const obj1 = {
+  id: 101,
+  name: "Product A",
+  meta: {
+    lastUpdated: "2024-01-01"
+  },
+  tags: ["electronics", "gadget", "popular"],
+  components: [
+    { partId: "P001", name: "Screen", details: { supplier: "S1"} },
+    { partId: "P002", name: "Battery", details: { supplier: "S2"} }
+  ],
+  misc: [ { type: "manual", lang: "en"}, { type: "warranty", duration: 12}]
+};
+
+const obj2 = {
+  id: 101,
+  name: "Product A",
+  meta: {
+    lastUpdated: "2024-01-15" // Different value
+  },
+  tags: ["gadget", "electronics", "popular"], // Same elements, different order
+  components: [
+    { partId: "P002", name: "Battery", details: { supplier: "S2"} }, // Different order
+    { partId: "P001", name: "Screen", details: { supplier: "S1"} } 
+  ],
+  misc: [ { type: "warranty", duration: 12}, { type: "manual", lang: "en"}] // Default 'exact' comparison will fail due to order
+};
+
+const comparator = new JSONCompare({
+  ignoredKeys: ['meta.lastUpdated'], // Ignoring a specific field
+  arrayComparisonStrategies: {
+    'tags': { type: 'set' },                            // Compare 'tags' array as a set
+    'components': { type: 'key', keyName: 'partId' }    // Compare 'components' by 'partId'
+    // 'misc' will use the default 'exact' comparison strategy
+  }
+});
+
+const result = comparator.compare(obj1, obj2);
+/*
+Expected outcome for 'result' with these objects and options:
+- obj1.meta.lastUpdated vs obj2.meta.lastUpdated: Difference ignored due to `ignoredKeys`.
+- obj1.tags vs obj2.tags: Match, because 'set' strategy ignores order.
+- obj1.components vs obj2.components: Match, because 'key' strategy (on 'partId') ignores order and objects are otherwise identical.
+- obj1.misc vs obj2.misc: Mismatch, because default 'exact' strategy is used and order is different.
+  - result.unmatched.values would show differences for misc[0] and misc[1].
+*/
+
+console.log(JSON.stringify(result, null, 2));
+// To check if everything matched as intended (ignoring 'misc' for this specific example):
+// const miscDifferences = result.unmatched.values.filter(v => v.path.startsWith('misc'));
+// const otherDifferences = result.unmatched.values.filter(v => !v.path.startsWith('misc'));
+// console.log("Matches excluding 'misc' differences:", otherDifferences.length === 0);
+
+```
+
 ## Result Structure
 
 The comparison result has the following structure:

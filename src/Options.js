@@ -16,6 +16,12 @@ class Options {
    * @param {boolean} [options.strictTypes=true] - Whether to strictly compare types
    * @param {boolean} [options.ignoreExtraKeys=false] - Whether to ignore keys in obj2 that aren't in obj1
    * @param {boolean} [options.matchKeysByName=false] - Whether to match regex by key name instead of only by path
+   * @param {Object} [options.arrayComparisonStrategies={}] - Strategies for comparing arrays at specific paths.
+   *   Keys are path strings (e.g., "users.items"), and values are strategy objects.
+   *   Supported strategy types:
+   *   - `{ type: 'exact' }`: (Default) Arrays must have elements in the same order and with the same values.
+   *   - `{ type: 'set' }`: Arrays are treated as sets; order doesn't matter, but all elements must be present in both.
+   *   - `{ type: 'key', keyName: 'yourKey' }`: Arrays of objects are compared by matching objects based on the value of `keyName`.
    */
   constructor(options = {}) {
     this.ignoredKeys = options.ignoredKeys || [];
@@ -24,6 +30,7 @@ class Options {
     this.strictTypes = options.strictTypes !== undefined ? options.strictTypes : true;
     this.ignoreExtraKeys = options.ignoreExtraKeys || false;
     this.matchKeysByName = options.matchKeysByName !== undefined ? options.matchKeysByName : false;
+    this.arrayComparisonStrategies = options.arrayComparisonStrategies || {};
 
     this._compileRegexPatterns();
   }
