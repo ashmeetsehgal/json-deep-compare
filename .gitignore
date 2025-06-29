@@ -7,7 +7,6 @@ yarn-error.log
 # Build outputs
 dist
 coverage
-docs
 *.tgz
 
 # IDE and editor files
