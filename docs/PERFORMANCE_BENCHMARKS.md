@@ -31,6 +31,8 @@ Detailed performance benchmarks, optimization tips, and real-world performance c
 
 ```javascript
 // Benchmark setup
+const { performance } = require('perf_hooks'); // Import for Node.js <= 17 compatibility
+
 const testEnvironment = {
   Node: 'v18.17.0',
   V8: '10.2.154.26',
@@ -41,14 +43,81 @@ const testEnvironment = {
   WarmupRuns: 1000
 };
 
-// Benchmark harness
+// Optimized benchmark harness with proper async handling
 class PerformanceBenchmark {
   constructor(iterations = 10000) {
     this.iterations = iterations;
     this.results = [];
   }
   
+  // Helper to detect if a function returns a promise
+  isPromise(value) {
+    return value && typeof value.then === 'function';
+  }
+  
+  // Optimized benchmark method that handles both sync and async functions
   async benchmark(name, fn, data) {
+    // Test function type during warmup
+    const testResult = fn(data);
+    const isAsync = this.isPromise(testResult);
+    
+    if (isAsync) {
+      await testResult; // Consume the test promise
+    }
+    
+    // Warmup with appropriate handling
+    for (let i = 0; i < 1000; i++) {
+      const result = fn(data);
+      if (isAsync) {
+        await result;
+      }
+    }
+    
+    // Actual benchmark with optimized execution
+    const start = performance.now();
+    
+    if (isAsync) {
+      // Async path: await each call
+      for (let i = 0; i < this.iterations; i++) {
+        await fn(data);
+      }
+    } else {
+      // Sync path: no await overhead
+      for (let i = 0; i < this.iterations; i++) {
+        fn(data);
+      }
+    }
+    
+    const end = performance.now();
+    
+    const avgTime = (end - start) / this.iterations;
+    this.results.push({ name, avgTime, totalTime: end - start, isAsync });
+    
+    return avgTime;
+  }
+  
+  // Dedicated method for synchronous functions (fastest)
+  benchmarkSync(name, fn, data) {
+    // Warmup
+    for (let i = 0; i < 1000; i++) {
+      fn(data);
+    }
+    
+    // Actual benchmark
+    const start = performance.now();
+    for (let i = 0; i < this.iterations; i++) {
+      fn(data);
+    }
+    const end = performance.now();
+    
+    const avgTime = (end - start) / this.iterations;
+    this.results.push({ name, avgTime, totalTime: end - start, isAsync: false });
+    
+    return avgTime;
+  }
+  
+  // Dedicated method for asynchronous functions
+  async benchmarkAsync(name, fn, data) {
     // Warmup
     for (let i = 0; i < 1000; i++) {
       await fn(data);
@@ -62,7 +131,7 @@ class PerformanceBenchmark {
     const end = performance.now();
     
     const avgTime = (end - start) / this.iterations;
-    this.results.push({ name, avgTime, totalTime: end - start });
+    this.results.push({ name, avgTime, totalTime: end - start, isAsync: true });
     
     return avgTime;
   }
