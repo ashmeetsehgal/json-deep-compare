@@ -22,6 +22,8 @@
   "scripts": {
     "test": "jest",
     "test:formats": "npm run build && node test/cjs-test.js && node --experimental-modules test/esm-test.mjs",
+    "benchmark": "npm run build && cd benchmark && npm install && node comprehensive-benchmark.js",
+    "benchmark:ultra": "npm run build && cd benchmark && node ultra-performance-test.js",
     "lint": "eslint .",
     "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:copy-package && npm run build:copy-types",
     "build:full": "npm run build && npm run test && npm run minify",
