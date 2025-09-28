@@ -160,13 +160,13 @@ class FastComparator {
     const len1 = keys1.length;
     const len2 = keys2.length;
 
-    // Early exit for different key counts
-    if (len1 !== len2) {
+    // Early exit only when obj2 is missing keys from obj1 (ignoreExtraKeys support)
+    if (len2 < len1) {
       return { 
         matchPercentage: 0, 
-        totalKeys: Math.max(len1, len2), 
+        totalKeys: len1, 
         matched: 0, 
-        unmatched: Math.max(len1, len2) 
+        unmatched: len1 - len2 
       };
     }
 

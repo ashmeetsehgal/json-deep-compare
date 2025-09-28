@@ -130,11 +130,13 @@ class UltraFastComparator {
       
       // Early exit if we have too many mismatches
       if (unmatched > len / 2) {
+        const totalKeysCompared = matched + unmatched;
+        const matchPercentage = totalKeysCompared > 0 ? Math.round((matched / totalKeysCompared) * 100) : 0;
         return { 
-          matchPercentage: 0, 
-          totalKeysCompared: len, 
+          matchPercentage, 
+          totalKeysCompared, 
           totalMatched: matched, 
-          totalUnmatched: len - matched 
+          totalUnmatched: unmatched 
         };
       }
     }
@@ -196,11 +198,13 @@ class UltraFastComparator {
       
       // Early exit if we have too many mismatches
       if (unmatched > len1 / 2) {
+        const totalKeysCompared = matched + unmatched;
+        const matchPercentage = totalKeysCompared > 0 ? Math.round((matched / totalKeysCompared) * 100) : 0;
         return { 
-          matchPercentage: 0, 
-          totalKeysCompared: len1, 
+          matchPercentage, 
+          totalKeysCompared, 
           totalMatched: matched, 
-          totalUnmatched: len1 - matched 
+          totalUnmatched: unmatched 
         };
       }
     }
