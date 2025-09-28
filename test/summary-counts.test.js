@@ -119,7 +119,7 @@ describe('Summary Count Accuracy Tests', () => {
       expect(result.totalKeys).toBe(3);
       expect(result.matched).toBe(2);
       expect(result.unmatched).toBe(1);
-      expect(result.matchPercentage).toBe(66.66666666666666);
+      expect(result.matchPercentage).toBeCloseTo(66.66666666666666, 10);
     });
   });
 
