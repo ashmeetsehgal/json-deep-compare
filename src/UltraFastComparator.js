@@ -250,10 +250,11 @@ class UltraFastComparator {
       // For reference equality, we still need to count the keys if they're objects
       if (typeof obj1 === 'object' && obj1 !== null) {
         if (Array.isArray(obj1)) {
-          return { matchPercentage: 100, totalKeysCompared: obj1.length, totalMatched: obj1.length, totalUnmatched: 0 };
+          // Use nested counting helper to get full nested totals
+          return this.ultraFastCompareArraysWithCounts(obj1, obj1);
         } else {
-          const keyCount = Object.keys(obj1).length;
-          return { matchPercentage: 100, totalKeysCompared: keyCount, totalMatched: keyCount, totalUnmatched: 0 };
+          // Use nested counting helper to get full nested totals
+          return this.ultraFastCompareObjectsWithCounts(obj1, obj1);
         }
       }
       return { matchPercentage: 100, totalKeysCompared: 1, totalMatched: 1, totalUnmatched: 0 };
