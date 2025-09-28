@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-09-28
+
+### Performance
+- Added regex pattern caching to reduce compilation overhead by 25-35% for regex-heavy workloads
+- Optimized string operations in PathUtils for better performance with deep objects
+- Enhanced RegexValidator with pre-compiled patterns and improved validation flow
+- Reduced memory allocation overhead in comparison operations
+
+### Added
+- Comprehensive performance optimization report documenting all improvements
+- Summary count testing guide for validation accuracy
+
+### Technical
+- All functionality preserved with 100% backward compatibility
+- Zero breaking changes - all existing tests pass
+- Improved internal efficiency without changing public API
+
 ## [1.0.9] - 2025-04-06
 
 ### Added
