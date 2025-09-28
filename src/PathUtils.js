@@ -106,7 +106,7 @@ class PathUtils {
             const [key, ...indexParts] = part.split('[');
             if (key) pathBuilder.addKey(key);
             for (const indexPart of indexParts) {
-              const index = parseInt(indexPart.replace(']', ''), 10);
+              const index = parseInt(indexPart.replace(/\]/g, ''), 10);
               pathBuilder.addIndex(index);
             }
           } else {
