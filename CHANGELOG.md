@@ -5,7 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.2] - 2025-01-27
+## [Unreleased]
+
+### Added
+- Open source community files (CODE_OF_CONDUCT.md, CONTRIBUTING.md, etc.)
+
+### Changed
+- Improved documentation for public repository
+
+### Security
+- Additional security policy documentation
+
+## [2.0.2] - 2025-10-15
 
 ### Fixed
 - **Critical cache collision fix**: Replaced truncated JSON-based cache keys with robust SHA256 hashing
@@ -49,14 +60,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Path utility handling of array notation
 - Type mismatch detection in non-strict mode
-
-## [Unreleased]
-
-### Added
-- Open source community files (CODE_OF_CONDUCT.md, CONTRIBUTING.md, etc.)
-
-### Changed
-- Improved documentation for public repository
-
-### Security
-- Additional security policy documentation
