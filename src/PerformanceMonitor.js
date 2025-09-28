@@ -132,7 +132,8 @@ class PerformanceMonitor {
   static recordPoolHit(poolType) {
     if (!this.enabled || !this.options.trackPools) return;
     
-    const key = `${poolType}PoolHits`;
+    // Map poolType to actual stats key
+    const key = poolType === 'regexCache' ? 'regexCacheHits' : `${poolType}PoolHits`;
     if (this.stats.poolStats[key] !== undefined) {
       this.stats.poolStats[key]++;
     }
@@ -145,7 +146,8 @@ class PerformanceMonitor {
   static recordPoolMiss(poolType) {
     if (!this.enabled || !this.options.trackPools) return;
     
-    const key = `${poolType}PoolMisses`;
+    // Map poolType to actual stats key
+    const key = poolType === 'regexCache' ? 'regexCacheMisses' : `${poolType}PoolMisses`;
     if (this.stats.poolStats[key] !== undefined) {
       this.stats.poolStats[key]++;
     }

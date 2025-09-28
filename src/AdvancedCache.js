@@ -157,7 +157,14 @@ class AdvancedCache {
     if (typeof obj === 'number') return `[number:${obj}]`;
     if (typeof obj === 'string') return `[string:${obj}]`;
     if (typeof obj === 'symbol') return `[symbol:${obj.toString()}]`;
-    if (typeof obj === 'function') return `[function:${obj.name || 'anonymous'}]`;
+    if (typeof obj === 'function') {
+      try {
+        return `[function:${obj.name || 'anonymous'}:${obj.toString()}]`;
+      } catch (error) {
+        // Fallback to name-only format if toString() fails
+        return `[function:${obj.name || 'anonymous'}]`;
+      }
+    }
     if (typeof obj === 'bigint') return `[bigint:${obj.toString()}]`;
     
     // Handle objects
