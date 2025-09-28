@@ -9,6 +9,9 @@ const Options = require('./Options');
 const Result = require('./Result');
 const RegexValidator = require('./RegexValidator');
 const Comparator = require('./Comparator');
+const FastComparator = require('./FastComparator');
+const UltraFastComparator = require('./UltraFastComparator');
+const BooleanComparator = require('./BooleanComparator');
 
 /**
  * Class for comparing JSON objects
@@ -29,6 +32,22 @@ class JSONCompare {
     this.result = new Result(this.options);
     this.regexValidator = new RegexValidator(this.options, this.result);
     this.comparator = new Comparator(this.options, this.result, this.regexValidator);
+    this.useFastMode = FastComparator.shouldUseFastMode(this.options);
+    this.useUltraFastMode = this.shouldUseUltraFastMode();
+  }
+
+  /**
+   * Check if ultra-fast mode should be used
+   * @returns {boolean} Whether to use ultra-fast mode
+   */
+  shouldUseUltraFastMode() {
+    // Use ultra-fast mode for absolute basic comparisons
+    return (!this.options.regexChecks || Object.keys(this.options.regexChecks).length === 0) &&
+           (!this.options.equivalentValues || Object.keys(this.options.equivalentValues).length === 0) &&
+           this.options.strictTypes === true &&  // Must be explicitly true
+           (!this.options.ignoredKeys || this.options.ignoredKeys.length === 0) &&
+           this.options.ignoreExtraKeys === true &&  // Must be true (default behavior)
+           !this.options.matchKeysByName;
   }
 
   /**
@@ -38,10 +57,43 @@ class JSONCompare {
    * @returns {Object} Comparison result
    */
   compare(obj1, obj2) {
+    // Use ultra-fast mode for absolute basic comparisons
+    if (this.useUltraFastMode) {
+      return UltraFastComparator.ultraFastCompareWithResult(obj1, obj2);
+    }
+
+    // Use fast mode for simple comparisons
+    if (this.useFastMode) {
+      const fastResult = FastComparator.fastCompare(obj1, obj2);
+      return {
+        matched: { keys: [], values: [] },
+        unmatched: { keys: [], values: [], types: [] },
+        regexChecks: { passed: [], failed: [] },
+        summary: {
+          matchPercentage: fastResult.matchPercentage,
+          totalKeysCompared: fastResult.totalKeys,
+          totalMatched: fastResult.matched,
+          totalUnmatched: fastResult.unmatched,
+          totalRegexChecks: 0
+        }
+      };
+    }
+
+    // Use full comparison for complex scenarios
     this.result.reset();
     this.comparator.compareObjects(obj1, obj2, '');
     this.result.updateSummary();
     return this.result.getResult();
+  }
+
+  /**
+   * Pure boolean comparison - fastest possible
+   * @param {Object} obj1 - First JSON object
+   * @param {Object} obj2 - Second JSON object
+   * @returns {boolean} Comparison result
+   */
+  isEqual(obj1, obj2) {
+    return BooleanComparator.booleanCompare(obj1, obj2);
   }
 
   /**
@@ -51,7 +103,27 @@ class JSONCompare {
    * @returns {Object} Enhanced result with all regex checks
    */
   compareAndValidate(obj1, obj2) {
-    this.compare(obj1, obj2);
+    // If we have regex checks, we can't use fast mode
+    if (this.useFastMode && (!this.options.regexChecks || Object.keys(this.options.regexChecks).length === 0)) {
+      // Use fast mode for basic comparison
+      const fastResult = FastComparator.fastCompare(obj1, obj2);
+      return {
+        matched: { keys: [], values: [] },
+        unmatched: { keys: [], values: [], types: [] },
+        regexChecks: { passed: [], failed: [] },
+        summary: {
+          matchPercentage: fastResult.matchPercentage,
+          totalKeysCompared: fastResult.totalKeys,
+          totalMatched: fastResult.matched,
+          totalUnmatched: fastResult.unmatched,
+          totalRegexChecks: 0
+        }
+      };
+    }
+
+    // Use full comparison for complex scenarios
+    this.result.reset();
+    this.comparator.compareObjects(obj1, obj2, '');
     this.regexValidator.validateAllMatchingKeys(obj2);
     this.result.updateSummary();
     return this.result.getResult();
