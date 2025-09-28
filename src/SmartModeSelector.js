@@ -26,8 +26,13 @@ class SmartModeSelector {
     const analysis = this.analyzeObjects(obj1, obj2);
     const optionsAnalysis = this.analyzeOptions(options);
 
-    // Ultra-fast mode: identical objects or simple structures
-    if (analysis.isIdentical || (analysis.isSimple && optionsAnalysis.isBasic)) {
+    // First check: if options require full mode, short-circuit to full
+    if (optionsAnalysis.requiresFullMode) {
+      return 'full';
+    }
+
+    // Ultra-fast mode: only for truly identical objects
+    if (analysis.isIdentical) {
       return 'ultraFast';
     }
 

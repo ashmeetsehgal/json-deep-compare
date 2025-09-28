@@ -186,6 +186,7 @@ class PerformanceMonitor {
    */
   static getReport() {
     const stats = this.getStats();
+    const opts = this.options || {};
     
     let report = '📊 JSONCompare Performance Report\n';
     report += '=' .repeat(40) + '\n\n';
@@ -205,13 +206,13 @@ class PerformanceMonitor {
     }
     report += '\n';
     
-    if (this.options.trackPools) {
+    if (opts.trackPools) {
       report += `🏊 Pool Statistics:\n`;
       report += `  Result Pool Hit Ratio: ${(stats.poolStats.resultPoolHitRatio * 100).toFixed(1)}%\n`;
       report += `  Regex Cache Hit Ratio: ${(stats.poolStats.regexCacheHitRatio * 100).toFixed(1)}%\n\n`;
     }
     
-    if (this.options.trackMemory) {
+    if (opts.trackMemory) {
       report += `💾 Memory Usage:\n`;
       report += `  Heap Used: ${(stats.memoryUsage.heapUsed / 1024 / 1024).toFixed(2)}MB\n`;
       report += `  Heap Total: ${(stats.memoryUsage.heapTotal / 1024 / 1024).toFixed(2)}MB\n`;

@@ -124,10 +124,15 @@ class PathUtils {
           let newPath;
           if (useBuilder) {
             const currentDepth = pathBuilder.depth();
+            // Save the original segment before mutation
+            const originalSegment = pathBuilder.parts.length > 0 ? pathBuilder.parts[pathBuilder.parts.length - 1] : null;
             pathBuilder.addIndex(i);
             newPath = pathBuilder.build();
-            // Restore builder state
+            // Restore builder state by restoring the original segment
             pathBuilder.parts.length = currentDepth;
+            if (originalSegment !== null) {
+              pathBuilder.parts[pathBuilder.parts.length - 1] = originalSegment;
+            }
           } else {
             newPath = currentPath ? `${currentPath}[${i}]` : `[${i}]`;
           }

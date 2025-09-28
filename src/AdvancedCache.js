@@ -4,6 +4,9 @@
  * @description Intelligent caching for type detection, regex patterns, and comparison results
  */
 
+const crypto = require('crypto');
+const util = require('util');
+
 /**
  * Advanced caching system for performance optimization
  * @private
@@ -130,30 +133,91 @@ class AdvancedCache {
    * @returns {string} Cache key
    */
   static generateCacheKey(obj1, obj2, options) {
-    // Simple hash-based key generation
+    // Generate stable, collision-resistant hashes
     const obj1Hash = this.hashObject(obj1);
     const obj2Hash = this.hashObject(obj2);
     const optionsHash = this.hashObject(options);
     
-    return `${obj1Hash}-${obj2Hash}-${optionsHash}`;
+    // Combine the three hashes and hash the result for maximum collision resistance
+    const combined = `${obj1Hash}|${obj2Hash}|${optionsHash}`;
+    return crypto.createHash('sha256').update(combined).digest('hex');
   }
 
   /**
-   * Simple hash function for objects
+   * Robust serializer for hash input that handles type metadata, circular refs, and non-JSON values
+   * @param {*} obj - Object to serialize
+   * @param {Set} seen - Set to track circular references
+   * @returns {string} Serialized representation
+   */
+  static serializeForHash(obj, seen = new Set()) {
+    // Handle primitive types with explicit type markers
+    if (obj === null) return '[null]';
+    if (obj === undefined) return '[undefined]';
+    if (typeof obj === 'boolean') return `[boolean:${obj}]`;
+    if (typeof obj === 'number') return `[number:${obj}]`;
+    if (typeof obj === 'string') return `[string:${obj}]`;
+    if (typeof obj === 'symbol') return `[symbol:${obj.toString()}]`;
+    if (typeof obj === 'function') return `[function:${obj.name || 'anonymous'}]`;
+    if (typeof obj === 'bigint') return `[bigint:${obj.toString()}]`;
+    
+    // Handle objects
+    if (typeof obj === 'object') {
+      // Check for circular references
+      if (seen.has(obj)) {
+        return '[circular]';
+      }
+      seen.add(obj);
+      
+      try {
+        // Handle arrays
+        if (Array.isArray(obj)) {
+          const items = obj.map(item => this.serializeForHash(item, seen));
+          return `[array:${items.join(',')}]`;
+        }
+        
+        // Handle Date objects
+        if (obj instanceof Date) {
+          return `[date:${obj.toISOString()}]`;
+        }
+        
+        // Handle RegExp objects
+        if (obj instanceof RegExp) {
+          return `[regexp:${obj.toString()}]`;
+        }
+        
+        // Handle Error objects
+        if (obj instanceof Error) {
+          return `[error:${obj.name}:${obj.message}]`;
+        }
+        
+        // Handle plain objects
+        const keys = Object.keys(obj).sort(); // Deterministic key ordering
+        const pairs = keys.map(key => {
+          const value = this.serializeForHash(obj[key], seen);
+          return `${key}:${value}`;
+        });
+        return `[object:${pairs.join(',')}]`;
+        
+      } catch (e) {
+        // Fallback for objects that can't be serialized
+        return `[object:${util.inspect(obj, { depth: null, maxArrayLength: null })}]`;
+      } finally {
+        seen.delete(obj);
+      }
+    }
+    
+    // Fallback for any other types
+    return `[unknown:${util.inspect(obj, { depth: null })}]`;
+  }
+
+  /**
+   * Generate stable, collision-resistant hash for objects using SHA256
    * @param {*} obj - Object to hash
-   * @returns {string} Hash string
+   * @returns {string} SHA256 hash string
    */
   static hashObject(obj) {
-    if (obj === null) return 'null';
-    if (obj === undefined) return 'undefined';
-    if (typeof obj !== 'object') return String(obj);
-    
-    // Simple hash for objects
-    try {
-      return JSON.stringify(obj).slice(0, 50);
-    } catch (e) {
-      return '[object]';
-    }
+    const serialized = this.serializeForHash(obj);
+    return crypto.createHash('sha256').update(serialized).digest('hex');
   }
 
   /**

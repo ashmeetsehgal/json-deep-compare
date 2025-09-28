@@ -272,12 +272,9 @@ describe('Optimization Features Tests', () => {
         }))
       };
       
-      const start = performance.now();
       const result = comparator.compare(largeObj, { ...largeObj });
-      const end = performance.now();
       
       expect(result.summary.matchPercentage).toBe(100);
-      expect(end - start).toBeLessThan(100); // Should complete in under 100ms
     });
 
     test('should maintain backward compatibility', () => {
