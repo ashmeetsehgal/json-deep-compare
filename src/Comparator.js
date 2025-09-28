@@ -6,6 +6,71 @@
 const PathUtils = require('./PathUtils');
 
 /**
+ * Optimized type detection with caching for better performance
+ * @private
+ */
+class TypeDetector {
+  static typeCache = new WeakMap();
+  static primitiveTypeCache = new Map();
+  
+  /**
+   * Get the specific type of a value with caching
+   * @param {*} value - The value to check
+   * @returns {string} The specific type of the value
+   */
+  static getType(value) {
+    // Fast path for primitives (no caching needed for these)
+    if (value === null) return 'null';
+    if (value === undefined) return 'undefined';
+    
+    const primitiveType = typeof value;
+    if (primitiveType !== 'object') {
+      return primitiveType; // string, number, boolean, function, etc.
+    }
+    
+    // Check cache for objects
+    if (this.typeCache.has(value)) {
+      return this.typeCache.get(value);
+    }
+    
+    // Determine type for objects
+    let type;
+    if (Array.isArray(value)) {
+      type = 'array';
+    } else if (value instanceof Date) {
+      type = 'date';
+    } else if (value instanceof RegExp) {
+      type = 'regex';
+    } else {
+      // For objects, check constructor name
+      const constructorName = value.constructor?.name?.toLowerCase();
+      type = (constructorName && constructorName !== 'object') ? constructorName : 'object';
+    }
+    
+    // Cache the result for objects (but not primitives to avoid memory leaks)
+    this.typeCache.set(value, type);
+    return type;
+  }
+  
+  /**
+   * Clear the type cache (useful for testing or memory management)
+   */
+  static clearCache() {
+    this.typeCache = new WeakMap();
+    this.primitiveTypeCache.clear();
+  }
+  
+  /**
+   * Get cache statistics
+   */
+  static getCacheStats() {
+    return {
+      primitiveTypes: this.primitiveTypeCache.size
+    };
+  }
+}
+
+/**
  * Class for comparing objects
  */
 class Comparator {
@@ -22,25 +87,12 @@ class Comparator {
   }
 
   /**
-   * Get the specific type of a value
+   * Get the specific type of a value using optimized type detection
    * @param {*} value - The value to check
    * @returns {string} The specific type of the value (string, number, array, object, null, etc.)
    */
   getValueType(value) {
-    if (value === null) return 'null';
-    if (Array.isArray(value)) return 'array';
-    if (value instanceof Date) return 'date';
-    if (value instanceof RegExp) return 'regex';
-    
-    const type = typeof value;
-    
-    // For objects, we return 'object' unless it's a special built-in object
-    if (type === 'object') {
-      const constructor = value.constructor.name.toLowerCase();
-      return constructor !== 'object' ? constructor : 'object';
-    }
-    
-    return type; // string, number, boolean, undefined, function, etc.
+    return TypeDetector.getType(value);
   }
 
   /**

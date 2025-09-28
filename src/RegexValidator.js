@@ -6,6 +6,45 @@
 const PathUtils = require('./PathUtils');
 
 /**
+ * Global regex cache to avoid recompilation of patterns
+ * @private
+ */
+class RegexCache {
+  static cache = new Map();
+  
+  /**
+   * Get or compile a regex pattern
+   * @param {string|RegExp} pattern - Pattern to compile
+   * @returns {RegExp} Compiled regex
+   */
+  static getRegex(pattern) {
+    if (pattern instanceof RegExp) {
+      return pattern;
+    }
+    
+    const patternString = pattern.toString();
+    if (!this.cache.has(patternString)) {
+      this.cache.set(patternString, new RegExp(pattern));
+    }
+    return this.cache.get(patternString);
+  }
+  
+  /**
+   * Clear the cache (useful for testing)
+   */
+  static clear() {
+    this.cache.clear();
+  }
+  
+  /**
+   * Get cache size (useful for monitoring)
+   */
+  static size() {
+    return this.cache.size;
+  }
+}
+
+/**
  * Class for handling regex validation
  */
 class RegexValidator {
@@ -17,6 +56,12 @@ class RegexValidator {
   constructor(options, result) {
     this.options = options;
     this.result = result;
+    
+    // Pre-compile and cache all regex patterns for better performance
+    this.compiledRegexChecks = {};
+    for (const [key, pattern] of Object.entries(this.options.regexChecks || {})) {
+      this.compiledRegexChecks[key] = RegexCache.getRegex(pattern);
+    }
   }
 
   /**
@@ -29,8 +74,8 @@ class RegexValidator {
       return;
     }
 
-    // Check exact path match
-    for (const [keyPath, regex] of Object.entries(this.options.regexChecks)) {
+    // Check exact path match using pre-compiled regex patterns
+    for (const [keyPath, regex] of Object.entries(this.compiledRegexChecks)) {
       let shouldCheck = false;
       
       // Exact path match
@@ -87,8 +132,8 @@ class RegexValidator {
 
     const paths = PathUtils.getAllPaths(obj);
     
-    // For each regex check by key name
-    for (const [keyName, regex] of Object.entries(this.options.regexChecks)) {
+    // For each regex check by key name using pre-compiled patterns
+    for (const [keyName, regex] of Object.entries(this.compiledRegexChecks)) {
       // Find all paths that end with the key name
       const matchingPaths = paths.filter(path => {
         const lastPart = PathUtils.getKeyNameFromPath(path);

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-28T17:19:54.725Z",
+  "timestamp": "2025-09-28T17:46:08.020Z",
   "environment": {
     "node": "v20.12.1",
     "platform": "darwin",
@@ -8,29 +8,29 @@
   },
   "results": {
     "basicComparison": {
-      "json-deep-compare": 0.05368050840000001,
-      "lodash.isEqual": 0.0015956500000000005,
-      "deep-equal": 0.00042556249999998953
+      "json-deep-compare": 0.049187612500000005,
+      "lodash.isEqual": 0.0016275125000000002,
+      "deep-equal": 0.000449670900000001
     },
     "featureRich": {
-      "json-deep-compare": 0.0629068625,
-      "lodash.isEqual": 0.0013575000000000045,
-      "deep-equal": 0.00036755000000000565
+      "json-deep-compare": 0.0845826875,
+      "lodash.isEqual": 0.0013320000000000163,
+      "deep-equal": 0.000355600000000004
     },
     "apiResponse": {
-      "json-deep-compare": 0.06606837500000005,
-      "lodash.isEqual": 0.10200212499999997,
-      "deep-equal": 0.164052917
+      "json-deep-compare": 0.08594287499999996,
+      "lodash.isEqual": 0.10110491699999989,
+      "deep-equal": 0.10030504199999996
     },
     "configValidation": {
-      "json-deep-compare": 0.003266583999999966,
-      "lodash.isEqual": 0.0031059999999999946,
-      "deep-equal": 0.0005214159999998173
+      "json-deep-compare": 0.00416379199999983,
+      "lodash.isEqual": 0.002938499999999749,
+      "deep-equal": 0.0005198749999999564
     },
     "largeDataset": {
-      "json-deep-compare": 1.3451133299999993,
-      "lodash.isEqual": 0.0007129200000008495,
-      "deep-equal": 0.0005266699999992852
+      "json-deep-compare": 1.2561158299999988,
+      "lodash.isEqual": 0.0006695799999988594,
+      "deep-equal": 0.00044249999999919966
     }
   },
   "summary": {
