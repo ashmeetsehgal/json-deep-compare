@@ -121,30 +121,24 @@ class UltraFastComparator {
     
     let matched = 0;
     let unmatched = 0;
+    let partial = false;
     
-    // Ultra-fast element comparison with early exit
+    // Ultra-fast element comparison with full iteration
     for (let i = 0; i < len; i++) {
       const elementResult = this.ultraFastCompareWithCounts(arr1[i], arr2[i]);
       matched += elementResult.totalMatched;
       unmatched += elementResult.totalUnmatched;
       
-      // Early exit if we have too many mismatches
+      // Track if heuristic threshold was exceeded (for caller detection)
       if (unmatched > len / 2) {
-        const totalKeysCompared = matched + unmatched;
-        const matchPercentage = totalKeysCompared > 0 ? Math.round((matched / totalKeysCompared) * 100) : 0;
-        return { 
-          matchPercentage, 
-          totalKeysCompared, 
-          totalMatched: matched, 
-          totalUnmatched: unmatched 
-        };
+        partial = true;
       }
     }
     
     const totalKeysCompared = matched + unmatched;
     const matchPercentage = totalKeysCompared > 0 ? Math.round((matched / totalKeysCompared) * 100) : 100;
     
-    return { matchPercentage, totalKeysCompared, totalMatched: matched, totalUnmatched: unmatched };
+    return { matchPercentage, totalKeysCompared, totalMatched: matched, totalUnmatched: unmatched, partial };
   }
 
   /**
@@ -198,13 +192,16 @@ class UltraFastComparator {
       
       // Early exit if we have too many mismatches
       if (unmatched > len1 / 2) {
-        const totalKeysCompared = matched + unmatched;
+        // Account for remaining keys not yet visited
+        const remaining = len1 - (i + 1);
+        const totalUnmatched = unmatched + remaining;
+        const totalKeysCompared = len1;
         const matchPercentage = totalKeysCompared > 0 ? Math.round((matched / totalKeysCompared) * 100) : 0;
         return { 
           matchPercentage, 
           totalKeysCompared, 
           totalMatched: matched, 
-          totalUnmatched: unmatched 
+          totalUnmatched 
         };
       }
     }
