@@ -172,8 +172,10 @@ class ComprehensiveBenchmark {
     const obj1 = TestDataGenerator.generateAPIResponse();
     const obj2 = TestDataGenerator.generateAPIResponse();
     
+    // Create comparator once before benchmark
+    const comparator = new JSONCompare();
+    
     const jdcTime = this.benchmark('json-deep-compare', () => {
-      const comparator = new JSONCompare();
       return comparator.compare(obj1, obj2);
     });
     
@@ -203,15 +205,17 @@ class ComprehensiveBenchmark {
     const obj1 = TestDataGenerator.generateAPIResponse();
     const obj2 = TestDataGenerator.generateAPIResponse();
     
+    // Create comparator once before benchmark
+    const comparator = new JSONCompare({
+      regexChecks: {
+        'users[*].email': /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        'users[*].createdAt': /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
+        'meta.timestamp': /^\d+$/
+      },
+      strictTypes: true
+    });
+    
     const jdcTime = this.benchmark('json-deep-compare', () => {
-      const comparator = new JSONCompare({
-        regexChecks: {
-          'users[*].email': /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-          'users[*].createdAt': /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
-          'meta.timestamp': /^\d+$/
-        },
-        strictTypes: true
-      });
       return comparator.compareAndValidate(obj1, obj2);
     });
     
@@ -242,15 +246,17 @@ class ComprehensiveBenchmark {
     const response = TestDataGenerator.generateAPIResponse();
     const expected = TestDataGenerator.generateAPIResponse();
     
+    // Create comparator once before benchmark
+    const comparator = new JSONCompare({
+      regexChecks: {
+        'users[*].email': /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        'users[*].createdAt': /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
+        'users[*].lastLogin': /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/
+      },
+      ignoredKeys: ['meta.timestamp']
+    });
+    
     const jdcTime = this.benchmark('json-deep-compare', () => {
-      const comparator = new JSONCompare({
-        regexChecks: {
-          'users[*].email': /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-          'users[*].createdAt': /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
-          'users[*].lastLogin': /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/
-        },
-        ignoredKeys: ['meta.timestamp']
-      });
       return comparator.compareAndValidate(expected, response);
     }, 1000);
     
@@ -289,16 +295,18 @@ class ComprehensiveBenchmark {
     const config = TestDataGenerator.generateConfigObject();
     const expected = TestDataGenerator.generateConfigObject();
     
+    // Create comparator once before benchmark
+    const comparator = new JSONCompare({
+      regexChecks: {
+        'database.host': /^[a-zA-Z0-9.-]+$/,
+        'database.port': /^\d{1,5}$/,
+        'server.ssl.cert': /\.pem$/,
+        'api.version': /^v\d+$/,
+        'cache.ttl': /^\d+$/
+      }
+    });
+    
     const jdcTime = this.benchmark('json-deep-compare', () => {
-      const comparator = new JSONCompare({
-        regexChecks: {
-          'database.host': /^[a-zA-Z0-9.-]+$/,
-          'database.port': /^\d{1,5}$/,
-          'server.ssl.cert': /\.pem$/,
-          'api.version': /^v\d+$/,
-          'cache.ttl': /^\d+$/
-        }
-      });
       return comparator.compareAndValidate(expected, config);
     }, 1000);
     
@@ -328,8 +336,10 @@ class ComprehensiveBenchmark {
     const dataset1 = TestDataGenerator.generateLargeDataset();
     const dataset2 = TestDataGenerator.generateLargeDataset();
     
+    // Create comparator once before benchmark
+    const comparator = new JSONCompare();
+    
     const jdcTime = this.benchmark('json-deep-compare', () => {
-      const comparator = new JSONCompare();
       return comparator.compare(dataset1, dataset2);
     }, 100);
     

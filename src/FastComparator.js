@@ -26,7 +26,7 @@ class FastComparator {
     }
 
     // Early exit for null/undefined
-    if (obj1 == null || obj2 == null) {
+    if (obj1 === null || obj1 === undefined || obj2 === null || obj2 === undefined) {
       return { 
         matchPercentage: obj1 === obj2 ? 100 : 0, 
         totalKeys: 1, 
@@ -92,20 +92,44 @@ class FastComparator {
       if (arr1[i] === arr2[i]) {
         matched++;
       } else {
-        // For nested objects, do a quick deep check
-        const nestedResult = this.fastCompare(arr1[i], arr2[i]);
-        if (nestedResult.matchPercentage === 100) {
-          matched++;
+        // Check for strict null/undefined equality before deep comparison
+        const elem1 = arr1[i];
+        const elem2 = arr2[i];
+        const elem1IsNullish = elem1 === null || elem1 === undefined;
+        const elem2IsNullish = elem2 === null || elem2 === undefined;
+        
+        if (elem1IsNullish && elem2IsNullish) {
+          // Both are null/undefined - check strict equality
+          if (elem1 === elem2) {
+            matched++;
+          } else {
+            unmatched++;
+            // Early exit if we have too many mismatches
+            if (unmatched > len1 / 2) {
+              return { 
+                matchPercentage: 0, 
+                totalKeys: len1, 
+                matched, 
+                unmatched: len1 - matched 
+              };
+            }
+          }
         } else {
-          unmatched++;
-          // Early exit if we have too many mismatches
-          if (unmatched > len1 / 2) {
-            return { 
-              matchPercentage: 0, 
-              totalKeys: len1, 
-              matched, 
-              unmatched: len1 - matched 
-            };
+          // For nested objects, do a quick deep check
+          const nestedResult = this.fastCompare(elem1, elem2);
+          if (nestedResult.matchPercentage === 100) {
+            matched++;
+          } else {
+            unmatched++;
+            // Early exit if we have too many mismatches
+            if (unmatched > len1 / 2) {
+              return { 
+                matchPercentage: 0, 
+                totalKeys: len1, 
+                matched, 
+                unmatched: len1 - matched 
+              };
+            }
           }
         }
       }
@@ -161,20 +185,44 @@ class FastComparator {
       if (obj1[key] === obj2[key]) {
         matched++;
       } else {
-        // For nested objects, do a quick deep check
-        const nestedResult = this.fastCompare(obj1[key], obj2[key]);
-        if (nestedResult.matchPercentage === 100) {
-          matched++;
+        // Check for strict null/undefined equality before deep comparison
+        const val1 = obj1[key];
+        const val2 = obj2[key];
+        const val1IsNullish = val1 === null || val1 === undefined;
+        const val2IsNullish = val2 === null || val2 === undefined;
+        
+        if (val1IsNullish && val2IsNullish) {
+          // Both are null/undefined - check strict equality
+          if (val1 === val2) {
+            matched++;
+          } else {
+            unmatched++;
+            // Early exit if we have too many mismatches
+            if (unmatched > len1 / 2) {
+              return { 
+                matchPercentage: 0, 
+                totalKeys: len1, 
+                matched, 
+                unmatched: len1 - matched 
+              };
+            }
+          }
         } else {
-          unmatched++;
-          // Early exit if we have too many mismatches
-          if (unmatched > len1 / 2) {
-            return { 
-              matchPercentage: 0, 
-              totalKeys: len1, 
-              matched, 
-              unmatched: len1 - matched 
-            };
+          // For nested objects, do a quick deep check
+          const nestedResult = this.fastCompare(val1, val2);
+          if (nestedResult.matchPercentage === 100) {
+            matched++;
+          } else {
+            unmatched++;
+            // Early exit if we have too many mismatches
+            if (unmatched > len1 / 2) {
+              return { 
+                matchPercentage: 0, 
+                totalKeys: len1, 
+                matched, 
+                unmatched: len1 - matched 
+              };
+            }
           }
         }
       }
@@ -197,7 +245,7 @@ class FastComparator {
            (!options.equivalentValues || Object.keys(options.equivalentValues).length === 0) &&
            options.strictTypes === true &&  // Must be explicitly true
            (!options.ignoredKeys || options.ignoredKeys.length === 0) &&
-           options.ignoreExtraKeys === true &&  // Must be true (default behavior)
+           options.ignoreExtraKeys === true &&  // Must be explicitly true to enable fast mode when ignoring extras
            !options.matchKeysByName;
   }
 }
