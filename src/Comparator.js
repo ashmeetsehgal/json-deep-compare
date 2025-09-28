@@ -103,16 +103,16 @@ class Comparator {
    * @param {Object} obj1 - First object
    * @param {Object} obj2 - Second object
    * @param {string} path - Current path in the object
-   * @param {WeakSet} visited - Set of visited objects to prevent circular references
+   * @param {WeakMap} visitedPairs - Map of obj1 -> WeakSet of obj2 to prevent circular references
    */
-  compareObjects(obj1 = {}, obj2 = {}, path = '', visited = new WeakSet()) {
+  compareObjects(obj1 = {}, obj2 = {}, path = '', visitedPairs = new WeakMap()) {
     if (obj1 === null || obj2 === null) {
       this.compareValues(obj1, obj2, path);
       return;
     }
 
-    // Check for circular references
-    if (visited.has(obj1) || visited.has(obj2)) {
+    // Check for circular references - only short-circuit when exact object pair has been visited
+    if (visitedPairs.has(obj1) && visitedPairs.get(obj1).has(obj2)) {
       this.result.addMatchedValue({
         path,
         value: '[Circular Reference]',
@@ -123,17 +123,17 @@ class Comparator {
       return;
     }
 
-    // Add objects to visited set
-    if (typeof obj1 === 'object' && obj1 !== null) {
-      visited.add(obj1);
-    }
-    if (typeof obj2 === 'object' && obj2 !== null) {
-      visited.add(obj2);
+    // Add object pair to visited pairs map (only for non-null objects)
+    if (typeof obj1 === 'object' && obj1 !== null && typeof obj2 === 'object' && obj2 !== null) {
+      if (!visitedPairs.has(obj1)) {
+        visitedPairs.set(obj1, new WeakSet());
+      }
+      visitedPairs.get(obj1).add(obj2);
     }
 
     // Handle arrays
     if (Array.isArray(obj1) && Array.isArray(obj2)) {
-      this.compareArrays(obj1, obj2, path, visited);
+      this.compareArrays(obj1, obj2, path, visitedPairs);
       return;
     }
 
@@ -157,7 +157,7 @@ class Comparator {
         if (typeof obj1[key] === 'object' && obj1[key] !== null && 
             typeof obj2[key] === 'object' && obj2[key] !== null) {
           // Recursive comparison for nested objects
-          this.compareObjects(obj1[key], obj2[key], newPath, visited);
+          this.compareObjects(obj1[key], obj2[key], newPath, visitedPairs);
         } else {
           this.compareValues(obj1[key], obj2[key], newPath);
         }
@@ -191,7 +191,7 @@ class Comparator {
    * @param {Array} arr2 - Second array
    * @param {string} path - Current path
    */
-  compareArrays(arr1, arr2, path, visited = new WeakSet()) {
+  compareArrays(arr1, arr2, path, visitedPairs = new WeakMap()) {
     // Check if array lengths match
     if (arr1.length !== arr2.length) {
       this.result.addUnmatchedValue({
@@ -208,7 +208,7 @@ class Comparator {
       const newPath = PathUtils.buildArrayPath(path, i);
       if (typeof arr1[i] === 'object' && arr1[i] !== null && 
           typeof arr2[i] === 'object' && arr2[i] !== null) {
-        this.compareObjects(arr1[i], arr2[i], newPath, visited);
+        this.compareObjects(arr1[i], arr2[i], newPath, visitedPairs);
       } else {
         this.compareValues(arr1[i], arr2[i], newPath);
       }

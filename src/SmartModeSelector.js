@@ -53,12 +53,65 @@ class SmartModeSelector {
    */
   static analyzeObjects(obj1, obj2) {
     return {
-      isIdentical: obj1 === obj2,
+      isIdentical: this.areObjectsIdentical(obj1, obj2),
       isSimple: this.isSimpleStructure(obj1) && this.isSimpleStructure(obj2),
       hasNestedObjects: this.hasNestedObjects(obj1) || this.hasNestedObjects(obj2),
       hasArrays: Array.isArray(obj1) || Array.isArray(obj2),
       size: this.estimateSize(obj1) + this.estimateSize(obj2)
     };
+  }
+
+  /**
+   * Check if objects are truly identical (deep equality for simple cases)
+   * @param {*} obj1 - First object
+   * @param {*} obj2 - Second object
+   * @param {WeakSet} visited - Set of visited objects to prevent circular references
+   * @returns {boolean} Whether objects are identical
+   */
+  static areObjectsIdentical(obj1, obj2, visited = new WeakSet()) {
+    // Reference equality check first
+    if (obj1 === obj2) return true;
+    
+    // Type check
+    if (typeof obj1 !== typeof obj2) return false;
+    
+    // Null/undefined check
+    if (obj1 === null || obj2 === null) return obj1 === obj2;
+    
+    // Primitive types
+    if (typeof obj1 !== 'object') return obj1 === obj2;
+    
+    // Check for circular references
+    if (visited.has(obj1) || visited.has(obj2)) return true; // Assume equal for circular refs
+    
+    // Add objects to visited set
+    visited.add(obj1);
+    visited.add(obj2);
+    
+    // Array check
+    if (Array.isArray(obj1) !== Array.isArray(obj2)) return false;
+    
+    // For arrays, check length and elements
+    if (Array.isArray(obj1)) {
+      if (obj1.length !== obj2.length) return false;
+      for (let i = 0; i < obj1.length; i++) {
+        if (!this.areObjectsIdentical(obj1[i], obj2[i], visited)) return false;
+      }
+      return true;
+    }
+    
+    // For objects, check keys and values
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    
+    if (keys1.length !== keys2.length) return false;
+    
+    for (const key of keys1) {
+      if (!keys2.includes(key)) return false;
+      if (!this.areObjectsIdentical(obj1[key], obj2[key], visited)) return false;
+    }
+    
+    return true;
   }
 
   /**
