@@ -9,7 +9,21 @@
 const { performance } = require('perf_hooks');
 const JSONCompare = require('../dist/cjs/index.js').default;
 
-// Test data generators
+/**
+ * Creates a small nested test object representing a user with profile and preferences.
+ *
+ * @returns {Object} A user object with the following shape:
+ *  - id: number
+ *  - name: string
+ *  - email: string
+ *  - active: boolean
+ *  - profile: object containing:
+ *      - age: number
+ *      - city: string
+ *      - preferences: object containing:
+ *          - theme: string
+ *          - notifications: boolean
+ */
 function generateSmallObject() {
   return {
     id: 123,
@@ -27,6 +41,14 @@ function generateSmallObject() {
   };
 }
 
+/**
+ * Create a medium-sized test fixture containing user and product arrays.
+ *
+ * The returned object is intended for performance testing and contains 100 user entries
+ * (each produced by generateSmallObject) and 200 product entries.
+ * @return {{users: Array<Object>, products: Array<{id: number, name: string, price: number, category: string}>}}
+ * An object with `users` (array of 100 small user objects) and `products` (array of 200 product objects with `id`, `name`, `price`, and `category`).
+ */
 function generateMediumObject() {
   const obj = { users: [], products: [] };
   for (let i = 0; i < 100; i++) {
@@ -43,6 +65,16 @@ function generateMediumObject() {
   return obj;
 }
 
+/**
+ * Create a large test object with 1000 keyed entries containing nested data.
+ *
+ * Each key is named "key0" through "key999" and maps to an object with:
+ * - `id`: the numeric index
+ * - `value`: a string "value{index}"
+ * - `nested`: an object with `data` string "nested{index}" and `array` containing [1, 2, 3, index]
+ *
+ * @returns {Object} An object with 1000 keys ("key0"..."key999") each holding the described nested structure.
+ */
 function generateLargeObject() {
   const obj = {};
   for (let i = 0; i < 1000; i++) {
@@ -58,7 +90,13 @@ function generateLargeObject() {
   return obj;
 }
 
-// Simple deep equal for comparison
+/**
+ * Determine whether two values are deeply equal by comparing their structure and values.
+ *
+ * @param {*} obj1 - The first value to compare.
+ * @param {*} obj2 - The second value to compare.
+ * @returns {boolean} `true` if the values are deeply equal, `false` otherwise.
+ */
 function simpleDeepEqual(obj1, obj2) {
   if (obj1 === obj2) return true;
   if (obj1 == null || obj2 == null) return obj1 === obj2;
@@ -86,7 +124,17 @@ function simpleDeepEqual(obj1, obj2) {
   return false;
 }
 
-// Benchmark function
+/**
+ * Measure average execution time of a synchronous function over multiple runs.
+ *
+ * Performs a brief warmup, then times the provided function across the specified
+ * number of iterations and returns the average duration per iteration in milliseconds.
+ *
+ * @param {string} name - Informational label for the benchmark.
+ * @param {Function} fn - Synchronous function to measure.
+ * @param {number} [iterations=10000] - Number of timed iterations to run.
+ * @returns {number} Average time per iteration in milliseconds.
+ */
 function benchmark(name, fn, iterations = 10000) {
   // Warmup
   for (let i = 0; i < 1000; i++) {
@@ -201,6 +249,11 @@ scenarios.forEach(scenario => {
   console.log('\n' + '=' .repeat(60) + '\n');
 });
 
+/**
+ * Selects and returns test data corresponding to the requested size.
+ * @param {string} size - One of `'small'`, `'medium'`, or `'large'` to choose the dataset size.
+ * @returns {object} The generated test data for the specified size; defaults to the small dataset when `size` is unrecognized.
+ */
 function generateTestData(size) {
   switch (size) {
     case 'small': return generateSmallObject();
