@@ -4,6 +4,7 @@
  */
 
 const PathUtils = require('./PathUtils');
+const AdvancedCache = require('./AdvancedCache');
 
 /**
  * Global regex cache to avoid recompilation of patterns
@@ -22,11 +23,25 @@ class RegexCache {
       return pattern;
     }
     
-    const patternString = pattern.toString();
-    if (!this.cache.has(patternString)) {
-      this.cache.set(patternString, new RegExp(pattern));
+    // Check advanced cache first
+    const cachedRegex = AdvancedCache.getCachedRegex(pattern);
+    if (cachedRegex) {
+      return cachedRegex;
     }
-    return this.cache.get(patternString);
+    
+    const patternString = pattern.toString();
+    let compiled;
+    
+    if (!this.cache.has(patternString)) {
+      compiled = new RegExp(pattern);
+      this.cache.set(patternString, compiled);
+    } else {
+      compiled = this.cache.get(patternString);
+    }
+    
+    // Cache in advanced cache as well
+    AdvancedCache.cacheRegex(pattern, compiled);
+    return compiled;
   }
   
   /**
@@ -54,7 +69,7 @@ class RegexValidator {
    * @param {Object} result - Result instance
    */
   constructor(options, result) {
-    this.options = options;
+    this.options = options || {};
     this.result = result;
     
     // Pre-compile and cache all regex patterns for better performance

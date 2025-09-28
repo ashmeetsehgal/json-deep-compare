@@ -3,6 +3,8 @@
  * @author AshmeetSehgal.com
  */
 
+const StringOptimizer = require('./StringOptimizer');
+
 /**
  * Optimized path builder for reducing string concatenation overhead
  * @private
@@ -215,15 +217,7 @@ class PathUtils {
    * @returns {string} New path
    */
   static buildPath(path, key) {
-    // Optimize for common cases
-    if (!path) return key;
-    if (!key) return path;
-    
-    // Use array join for better performance than template literals for long paths
-    if (path.length > 50) {
-      return [path, key].join('.');
-    }
-    return `${path}.${key}`;
+    return StringOptimizer.buildPath(path, key);
   }
 
   /**
@@ -233,11 +227,7 @@ class PathUtils {
    * @returns {string} New path
    */
   static buildArrayPath(path, index) {
-    // Optimize for common cases and cache small indices
-    if (index < 10) {
-      return path + '[' + index + ']';  // Faster than template literal for small numbers
-    }
-    return `${path}[${index}]`;
+    return StringOptimizer.buildArrayPath(path, index);
   }
 }
 

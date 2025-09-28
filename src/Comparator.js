@@ -4,6 +4,7 @@
  */
 
 const PathUtils = require('./PathUtils');
+const AdvancedCache = require('./AdvancedCache');
 
 /**
  * Optimized type detection with caching for better performance
@@ -14,7 +15,7 @@ class TypeDetector {
   static primitiveTypeCache = new Map();
   
   /**
-   * Get the specific type of a value with caching
+   * Get the specific type of a value with advanced caching
    * @param {*} value - The value to check
    * @returns {string} The specific type of the value
    */
@@ -28,9 +29,10 @@ class TypeDetector {
       return primitiveType; // string, number, boolean, function, etc.
     }
     
-    // Check cache for objects
-    if (this.typeCache.has(value)) {
-      return this.typeCache.get(value);
+    // Check advanced cache first
+    const cachedType = AdvancedCache.getCachedType(value);
+    if (cachedType) {
+      return cachedType;
     }
     
     // Determine type for objects
@@ -47,8 +49,9 @@ class TypeDetector {
       type = (constructorName && constructorName !== 'object') ? constructorName : 'object';
     }
     
-    // Cache the result for objects (but not primitives to avoid memory leaks)
+    // Cache the result in both caches
     this.typeCache.set(value, type);
+    AdvancedCache.cacheType(value, type);
     return type;
   }
   
@@ -100,16 +103,37 @@ class Comparator {
    * @param {Object} obj1 - First object
    * @param {Object} obj2 - Second object
    * @param {string} path - Current path in the object
+   * @param {WeakSet} visited - Set of visited objects to prevent circular references
    */
-  compareObjects(obj1 = {}, obj2 = {}, path = '') {
+  compareObjects(obj1 = {}, obj2 = {}, path = '', visited = new WeakSet()) {
     if (obj1 === null || obj2 === null) {
       this.compareValues(obj1, obj2, path);
       return;
     }
 
+    // Check for circular references
+    if (visited.has(obj1) || visited.has(obj2)) {
+      this.result.addMatchedValue({
+        path,
+        value: '[Circular Reference]',
+        type1: 'circular',
+        type2: 'circular',
+        message: 'Circular reference detected - objects are considered equal'
+      });
+      return;
+    }
+
+    // Add objects to visited set
+    if (typeof obj1 === 'object' && obj1 !== null) {
+      visited.add(obj1);
+    }
+    if (typeof obj2 === 'object' && obj2 !== null) {
+      visited.add(obj2);
+    }
+
     // Handle arrays
     if (Array.isArray(obj1) && Array.isArray(obj2)) {
-      this.compareArrays(obj1, obj2, path);
+      this.compareArrays(obj1, obj2, path, visited);
       return;
     }
 
@@ -120,7 +144,7 @@ class Comparator {
     }
 
     // Compare object keys
-    const keys1 = Object.keys(obj1).filter(key => !this.options.ignoredKeys.includes(key));
+    const keys1 = Object.keys(obj1).filter(key => !(this.options.ignoredKeys || []).includes(key));
     
     for (const key of keys1) {
       const newPath = PathUtils.buildPath(path, key);
@@ -133,7 +157,7 @@ class Comparator {
         if (typeof obj1[key] === 'object' && obj1[key] !== null && 
             typeof obj2[key] === 'object' && obj2[key] !== null) {
           // Recursive comparison for nested objects
-          this.compareObjects(obj1[key], obj2[key], newPath);
+          this.compareObjects(obj1[key], obj2[key], newPath, visited);
         } else {
           this.compareValues(obj1[key], obj2[key], newPath);
         }
@@ -149,7 +173,7 @@ class Comparator {
     // Check for extra keys in obj2 if not ignoring them
     if (!this.options.ignoreExtraKeys) {
       for (const key of Object.keys(obj2)) {
-        if (!this.options.ignoredKeys.includes(key) && !(key in obj1)) {
+        if (!(this.options.ignoredKeys || []).includes(key) && !(key in obj1)) {
           const newPath = PathUtils.buildPath(path, key);
           this.result.addUnmatchedKey({
             path: newPath,
@@ -167,7 +191,7 @@ class Comparator {
    * @param {Array} arr2 - Second array
    * @param {string} path - Current path
    */
-  compareArrays(arr1, arr2, path) {
+  compareArrays(arr1, arr2, path, visited = new WeakSet()) {
     // Check if array lengths match
     if (arr1.length !== arr2.length) {
       this.result.addUnmatchedValue({
@@ -184,7 +208,7 @@ class Comparator {
       const newPath = PathUtils.buildArrayPath(path, i);
       if (typeof arr1[i] === 'object' && arr1[i] !== null && 
           typeof arr2[i] === 'object' && arr2[i] !== null) {
-        this.compareObjects(arr1[i], arr2[i], newPath);
+        this.compareObjects(arr1[i], arr2[i], newPath, visited);
       } else {
         this.compareValues(arr1[i], arr2[i], newPath);
       }
@@ -224,7 +248,7 @@ class Comparator {
     const type2 = this.getValueType(val2);
 
     // Check for equivalent values as defined in options
-    for (const [key, values] of Object.entries(this.options.equivalentValues)) {
+    for (const [key, values] of Object.entries(this.options.equivalentValues || {})) {
       if (Array.isArray(values) && values.includes(val1) && values.includes(val2)) {
         this.result.addMatchedValue({
           path,
