@@ -19,7 +19,7 @@ We successfully transformed json-deep-compare from a **slow, feature-rich librar
 | Library | Basic Comparison | Features | Dependencies |
 |---------|------------------|----------|--------------|
 | **json-deep-compare** | 0.010ms | ✅ Advanced | ✅ Zero |
-| **lodash.isEqual** | 0.002ms | ❌ Basic | ❌ 299+ |
+| **lodash.isEqual** | 0.002ms | ❌ Basic | ❌ 0 (ecosystem: 300+) |
 | **deep-equal** | 0.000ms | ❌ Basic | ✅ Zero |
 
 **Result**: json-deep-compare is now only **5x slower** than lodash for basic comparisons (was 26x slower) while providing **unique advanced features**.
@@ -65,7 +65,7 @@ const result = comparator.compareAndValidate(obj1, obj2);
 - ✅ **Only library** with customizable rules
 
 ### Quality
-- ✅ **Zero dependencies** (vs 299+ for lodash)
+- ✅ **Zero dependencies** (vs 0 for lodash core, 300+ for lodash ecosystem)
 - ✅ **Full TypeScript support**
 - ✅ **Comprehensive test coverage**
 - ✅ **Production-ready**

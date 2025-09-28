@@ -365,15 +365,15 @@ class ComprehensiveBenchmark {
 
   generateComprehensiveReport() {
     console.log('📋 COMPREHENSIVE BENCHMARK REPORT');
-    console.log('=' .repeat(80));
+    console.log('='.repeat(80));
     
     // Performance table
     console.log('\n📊 Performance Results:');
-    console.log('-' .repeat(50));
+    console.log('-'.repeat(50));
     
     const table = [
       ['Test Case', 'json-deep-compare', 'lodash.isEqual', 'deep-equal', 'Notes'],
-      ['-' .repeat(12), '-' .repeat(18), '-' .repeat(14), '-' .repeat(12), '-' .repeat(30)]
+      ['-'.repeat(12), '-'.repeat(18), '-'.repeat(14), '-'.repeat(12), '-'.repeat(30)]
     ];
     
     Object.entries(this.results).forEach(([testName, results]) => {
@@ -397,11 +397,11 @@ class ComprehensiveBenchmark {
     
     // Feature comparison
     console.log('\n🔍 Feature Comparison:');
-    console.log('-' .repeat(30));
+    console.log('-'.repeat(30));
     
     const features = [
       ['Feature', 'json-deep-compare', 'lodash.isEqual', 'deep-equal'],
-      ['-' .repeat(20), '-' .repeat(18), '-' .repeat(14), '-' .repeat(12)],
+      ['-'.repeat(20), '-'.repeat(18), '-'.repeat(14), '-'.repeat(12)],
       ['Basic Comparison', '✅', '✅', '✅'],
       ['Regex Validation', '✅', '❌', '❌'],
       ['Type Checking', '✅', '❌', '❌'],
@@ -418,7 +418,7 @@ class ComprehensiveBenchmark {
     
     // Recommendations
     console.log('\n💡 Recommendations:');
-    console.log('-' .repeat(20));
+    console.log('-'.repeat(20));
     
     const basicWinner = this.results.basicComparison['json-deep-compare'] < 
       Math.min(this.results.basicComparison['lodash.isEqual'], this.results.basicComparison['deep-equal']);

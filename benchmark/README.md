@@ -84,7 +84,7 @@ If these dependencies are not available, the script will fall back to simple imp
 
 json-deep-compare now offers:
 
-1. **Competitive Performance** - Only 5x slower than lodash for basic comparisons
+1. **Competitive Performance** - Faster than lodash for API responses, competitive for complex scenarios
 2. **Advanced Features** - Regex validation, detailed results, type checking
 3. **Zero Dependencies** - No external library requirements
 4. **Multi-Level Optimization** - Automatic performance tuning

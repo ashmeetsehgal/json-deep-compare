@@ -27,6 +27,9 @@ class BooleanComparator {
     // Fast primitive comparison
     if (typeof obj1 !== 'object') return obj1 === obj2;
     
+    // Explicit XOR array check - prevent arrays from being treated as plain objects
+    if (Array.isArray(obj1) !== Array.isArray(obj2)) return false;
+    
     // Fast array comparison
     if (Array.isArray(obj1) && Array.isArray(obj2)) {
       return this.booleanCompareArrays(obj1, obj2);
