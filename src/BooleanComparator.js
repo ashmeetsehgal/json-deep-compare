@@ -69,10 +69,11 @@ class BooleanComparator {
    */
   static booleanCompareObjects(obj1, obj2) {
     const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
     const len = keys1.length;
     
     // Fast key count check
-    if (len !== Object.keys(obj2).length) return false;
+    if (len !== keys2.length) return false;
     
     // Fast empty check
     if (len === 0) return true;
@@ -80,7 +81,7 @@ class BooleanComparator {
     // Ultra-fast key-value comparison with early exit
     for (let i = 0; i < len; i++) {
       const key = keys1[i];
-      if (!(key in obj2) || !this.booleanCompare(obj1[key], obj2[key])) {
+      if (!Object.prototype.hasOwnProperty.call(obj2, key) || !this.booleanCompare(obj1[key], obj2[key])) {
         return false;
       }
     }

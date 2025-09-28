@@ -1,0 +1,50 @@
+{
+  "timestamp": "2025-09-28T17:13:12.948Z",
+  "environment": {
+    "node": "v20.12.1",
+    "platform": "darwin",
+    "arch": "arm64",
+    "realLibraries": true
+  },
+  "results": {
+    "basicComparison": {
+      "json-deep-compare": 0.05005158330000001,
+      "lodash.isEqual": 0.0015652874999999994,
+      "deep-equal": 0.0004152750000000083
+    },
+    "featureRich": {
+      "json-deep-compare": 0.0626111167,
+      "lodash.isEqual": 0.0013656500000000051,
+      "deep-equal": 0.0003553124999999909
+    },
+    "apiResponse": {
+      "json-deep-compare": 0.06451925000000006,
+      "lodash.isEqual": 0.10250029200000017,
+      "deep-equal": 0.10090300000000002
+    },
+    "configValidation": {
+      "json-deep-compare": 0.0028796250000000328,
+      "lodash.isEqual": 0.0027687080000000606,
+      "deep-equal": 0.0005083749999998872
+    },
+    "largeDataset": {
+      "json-deep-compare": 1.259502910000001,
+      "lodash.isEqual": 0.0007429200000024139,
+      "deep-equal": 0.00045333000000027826
+    }
+  },
+  "summary": {
+    "basicComparisonWinner": false,
+    "uniqueFeatures": [
+      "regex-validation",
+      "detailed-results",
+      "type-checking",
+      "custom-rules"
+    ],
+    "recommendations": [
+      "Emphasize unique features over raw performance",
+      "Position as feature-rich comparison library",
+      "Highlight enterprise-grade validation capabilities"
+    ]
+  }
+}
