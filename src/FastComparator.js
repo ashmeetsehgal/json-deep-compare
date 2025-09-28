@@ -148,6 +148,13 @@ class FastComparator {
    * @returns {Object} Comparison result
    */
   static fastCompareObjects(obj1, obj2) {
+    // Guard: Only use fast path for plain objects (prototype === Object.prototype)
+    if (Object.getPrototypeOf(obj1) !== Object.prototype || 
+        Object.getPrototypeOf(obj2) !== Object.prototype) {
+      // Fall back to stricter comparison for non-plain objects
+      return { matchPercentage: 0, totalKeys: 1, matched: 0, unmatched: 1 };
+    }
+
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
     const len1 = keys1.length;

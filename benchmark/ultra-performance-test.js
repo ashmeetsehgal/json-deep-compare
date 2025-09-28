@@ -164,6 +164,14 @@ scenarios.forEach(scenario => {
   const obj1 = generateTestData(scenario.size);
   const obj2 = generateTestData(scenario.size);
   
+  // Create JSONCompare instances once before benchmarks
+  const booleanComparator = new JSONCompare();
+  const ultraFastComparator = new JSONCompare();
+  const fastComparator = new JSONCompare({ strictTypes: true, ignoreExtraKeys: true });
+  const fullComparator = new JSONCompare({
+    regexChecks: { email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
+  });
+  
   // Test different optimization levels
   const tests = [
     {
@@ -172,33 +180,19 @@ scenarios.forEach(scenario => {
     },
     {
       name: 'JSONCompare.isEqual (Boolean)',
-      fn: () => {
-        const comparator = new JSONCompare();
-        return comparator.isEqual(obj1, obj2);
-      }
+      fn: () => booleanComparator.isEqual(obj1, obj2)
     },
     {
       name: 'JSONCompare.compare (Ultra-Fast)',
-      fn: () => {
-        const comparator = new JSONCompare();
-        return comparator.compare(obj1, obj2);
-      }
+      fn: () => ultraFastComparator.compare(obj1, obj2)
     },
     {
       name: 'JSONCompare.compare (Fast)',
-      fn: () => {
-        const comparator = new JSONCompare({ strictTypes: false });
-        return comparator.compare(obj1, obj2);
-      }
+      fn: () => fastComparator.compare(obj1, obj2)
     },
     {
       name: 'JSONCompare.compare (Full)',
-      fn: () => {
-        const comparator = new JSONCompare({
-          regexChecks: { email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
-        });
-        return comparator.compare(obj1, obj2);
-      }
+      fn: () => fullComparator.compare(obj1, obj2)
     }
   ];
   
