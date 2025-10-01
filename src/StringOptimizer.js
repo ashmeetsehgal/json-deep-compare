@@ -212,3 +212,4 @@ class StringOptimizer {
 }
 
 module.exports = StringOptimizer;
+

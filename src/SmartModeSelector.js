@@ -65,10 +65,10 @@ class SmartModeSelector {
    * Check if objects are truly identical (deep equality for simple cases)
    * @param {*} obj1 - First object
    * @param {*} obj2 - Second object
-   * @param {WeakSet} visited - Set of visited objects to prevent circular references
+   * @param {WeakMap} visitedPairs - Map of obj1 -> WeakSet of obj2 to prevent circular references
    * @returns {boolean} Whether objects are identical
    */
-  static areObjectsIdentical(obj1, obj2, visited = new WeakSet()) {
+  static areObjectsIdentical(obj1, obj2, visitedPairs = new WeakMap()) {
     // Reference equality check first
     if (obj1 === obj2) return true;
     
@@ -81,12 +81,18 @@ class SmartModeSelector {
     // Primitive types
     if (typeof obj1 !== 'object') return obj1 === obj2;
     
-    // Check for circular references
-    if (visited.has(obj1) || visited.has(obj2)) return true; // Assume equal for circular refs
+    // Check for circular references - only short-circuit when exact object pair has been visited
+    if (visitedPairs.has(obj1) && visitedPairs.get(obj1).has(obj2)) {
+      return true; // Assume equal for circular refs
+    }
     
-    // Add objects to visited set
-    visited.add(obj1);
-    visited.add(obj2);
+    // Add object pair to visited pairs map (only for non-null objects)
+    if (typeof obj1 === 'object' && obj1 !== null && typeof obj2 === 'object' && obj2 !== null) {
+      if (!visitedPairs.has(obj1)) {
+        visitedPairs.set(obj1, new WeakSet());
+      }
+      visitedPairs.get(obj1).add(obj2);
+    }
     
     // Array check
     if (Array.isArray(obj1) !== Array.isArray(obj2)) return false;
@@ -95,7 +101,7 @@ class SmartModeSelector {
     if (Array.isArray(obj1)) {
       if (obj1.length !== obj2.length) return false;
       for (let i = 0; i < obj1.length; i++) {
-        if (!this.areObjectsIdentical(obj1[i], obj2[i], visited)) return false;
+        if (!this.areObjectsIdentical(obj1[i], obj2[i], visitedPairs)) return false;
       }
       return true;
     }
@@ -108,7 +114,7 @@ class SmartModeSelector {
     
     for (const key of keys1) {
       if (!keys2.includes(key)) return false;
-      if (!this.areObjectsIdentical(obj1[key], obj2[key], visited)) return false;
+      if (!this.areObjectsIdentical(obj1[key], obj2[key], visitedPairs)) return false;
     }
     
     return true;
@@ -204,7 +210,7 @@ class SmartModeSelector {
   static requiresFullMode(options) {
     return (
       this.hasAdvancedFeatures(options) ||
-      options.ignoreExtraKeys === false // Full mode needed for strict key checking
+      (Object.prototype.hasOwnProperty.call(options, 'ignoreExtraKeys') && options.ignoreExtraKeys === false) // Full mode needed only when explicitly set to false
     );
   }
 
