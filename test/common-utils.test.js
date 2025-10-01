@@ -8,25 +8,26 @@ const CommonUtils = require('../src/CommonUtils');
 
 describe('CommonUtils Tests', () => {
   describe('safeWarn', () => {
-    let consoleSpy;
-
-    beforeEach(() => {
-      consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    test('should silently handle warnings without console output', () => {
+      // safeWarn is now intentionally silent to avoid console pollution in production
+      expect(() => {
+        CommonUtils.safeWarn('test', 'test message');
+      }).not.toThrow();
     });
 
-    afterEach(() => {
-      consoleSpy.mockRestore();
-    });
-
-    test('should log warning with context and message', () => {
-      CommonUtils.safeWarn('test', 'test message');
-      expect(consoleSpy).toHaveBeenCalledWith('Error in test: test message');
-    });
-
-    test('should log warning with error object', () => {
+    test('should silently handle warnings with error object', () => {
       const error = new Error('test error');
-      CommonUtils.safeWarn('test', 'test message', error);
-      expect(consoleSpy).toHaveBeenCalledWith('Error in test: test message', 'test error');
+      expect(() => {
+        CommonUtils.safeWarn('test', 'test message', error);
+      }).not.toThrow();
+    });
+
+    test('should accept all parameters without errors', () => {
+      expect(() => {
+        CommonUtils.safeWarn(null, null, null);
+        CommonUtils.safeWarn('', '', null);
+        CommonUtils.safeWarn('context', 'message', new Error());
+      }).not.toThrow();
     });
   });
 
@@ -154,16 +155,6 @@ describe('CommonUtils Tests', () => {
   });
 
   describe('safeExecute', () => {
-    let consoleSpy;
-
-    beforeEach(() => {
-      consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-      consoleSpy.mockRestore();
-    });
-
     test('should execute function successfully', () => {
       const result = CommonUtils.safeExecute(() => 'success', 'test');
       expect(result).toBe('success');
@@ -174,7 +165,6 @@ describe('CommonUtils Tests', () => {
         throw new Error('test error');
       }, 'test', 'fallback');
       expect(result).toBe('fallback');
-      expect(consoleSpy).toHaveBeenCalled();
     });
 
     test('should use default fallback', () => {
@@ -182,6 +172,14 @@ describe('CommonUtils Tests', () => {
         throw new Error('test error');
       }, 'test');
       expect(result).toBe(null);
+    });
+
+    test('should handle errors gracefully without throwing', () => {
+      expect(() => {
+        CommonUtils.safeExecute(() => {
+          throw new Error('test error');
+        }, 'test');
+      }).not.toThrow();
     });
   });
 

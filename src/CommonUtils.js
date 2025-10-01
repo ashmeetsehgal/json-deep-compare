@@ -9,17 +9,16 @@
  */
 class CommonUtils {
   /**
-   * Safe console warning with consistent formatting
+   * Safe warning handler - silently handles errors without console output
    * @param {string} context - Context where the warning occurred
    * @param {string} message - Warning message
    * @param {Error} [error] - Optional error object
    */
   static safeWarn(context, message, error = null) {
-    if (error) {
-      console.warn(`Error in ${context}: ${message}`, error.message);
-    } else {
-      console.warn(`Error in ${context}: ${message}`);
-    }
+    // Intentionally silent - errors are handled gracefully without console output
+    // This is a design choice to avoid production console pollution
+    // Parameters are accepted for API compatibility but not used
+    void context; void message; void error;
   }
 
   /**
@@ -58,6 +57,19 @@ class CommonUtils {
     return value === null || 
            value === undefined || 
            typeof value !== 'object';
+  }
+
+  /**
+   * Check if an object is a plain object (not Date, RegExp, Map, Set, etc.)
+   * @param {*} obj - Object to check
+   * @returns {boolean} Whether the object is a plain object
+   */
+  static isPlainObject(obj) {
+    if (obj === null || typeof obj !== 'object') return false;
+    
+    // Check if it's a plain object by verifying constructor and prototype
+    return Object.prototype.toString.call(obj) === '[object Object]' && 
+           (obj.constructor === Object || obj.constructor === undefined);
   }
 
   /**

@@ -163,7 +163,7 @@ class ErrorHandler {
         return val1 == val2;
       }
     } catch (error) {
-      console.warn('Error comparing values:', error.message);
+      // Silently handle error and return false
       return false;
     }
   }
@@ -179,7 +179,7 @@ class ErrorHandler {
       if (value === undefined) return 'undefined';
       return typeof value;
     } catch (error) {
-      console.warn('Error getting value type:', error.message);
+      // Silently handle error and return unknown
       return 'unknown';
     }
   }

@@ -4,6 +4,8 @@
  * @description String interning, caching, and optimization for memory efficiency
  */
 
+const CommonUtils = require('./CommonUtils');
+
 /**
  * String optimization class for memory efficiency
  * @private
@@ -150,7 +152,7 @@ class StringOptimizer {
     if (!obj || typeof obj !== 'object') return obj;
     
     // Bail out early for non-plain objects (Date, RegExp, Map, Buffer, etc.)
-    if (!this.isPlainObject(obj)) return obj;
+    if (!CommonUtils.isPlainObject(obj)) return obj;
     
     const optimized = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -159,7 +161,7 @@ class StringOptimizer {
         optimized[internedKey] = this.intern(value);
       } else if (Array.isArray(value)) {
         optimized[internedKey] = this.optimizeStringArray(value);
-      } else if (typeof value === 'object' && value !== null && this.isPlainObject(value)) {
+      } else if (typeof value === 'object' && value !== null && CommonUtils.isPlainObject(value)) {
         optimized[internedKey] = this.optimizePaths(value);
       } else {
         optimized[internedKey] = value;
@@ -169,18 +171,6 @@ class StringOptimizer {
     return optimized;
   }
 
-  /**
-   * Check if an object is a plain object (not Date, RegExp, Map, etc.)
-   * @param {*} obj - Object to check
-   * @returns {boolean} Whether the object is a plain object
-   */
-  static isPlainObject(obj) {
-    if (obj === null || typeof obj !== 'object') return false;
-    
-    // Check if it's a plain object by verifying constructor and prototype
-    return Object.prototype.toString.call(obj) === '[object Object]' && 
-           (obj.constructor === Object || obj.constructor === undefined);
-  }
 
   /**
    * Batch intern multiple strings for efficiency

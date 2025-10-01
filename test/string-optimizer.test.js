@@ -249,4 +249,141 @@ describe('StringOptimizer Tests', () => {
       expect(end - start).toBeLessThan(1000);
     });
   });
+
+  describe('optimizePaths', () => {
+    test('should optimize paths in plain objects', () => {
+      const obj = {
+        name: 'test',
+        path: 'some.path',
+        nested: {
+          key: 'value'
+        }
+      };
+      const optimized = StringOptimizer.optimizePaths(obj);
+      expect(optimized).toBeDefined();
+      expect(optimized.name).toBe('test');
+    });
+
+    test('should handle non-object input', () => {
+      expect(StringOptimizer.optimizePaths(null)).toBe(null);
+      expect(StringOptimizer.optimizePaths(undefined)).toBe(undefined);
+      expect(StringOptimizer.optimizePaths('string')).toBe('string');
+      expect(StringOptimizer.optimizePaths(123)).toBe(123);
+    });
+
+    test('should handle arrays in objects', () => {
+      const obj = {
+        arr: ['string1', 'string2', 'string3']
+      };
+      const optimized = StringOptimizer.optimizePaths(obj);
+      expect(optimized.arr).toEqual(['string1', 'string2', 'string3']);
+    });
+
+    test('should handle nested objects', () => {
+      const obj = {
+        level1: {
+          level2: {
+            level3: 'deep value'
+          }
+        }
+      };
+      const optimized = StringOptimizer.optimizePaths(obj);
+      expect(optimized.level1.level2.level3).toBe('deep value');
+    });
+
+    test('should handle Date objects (non-plain)', () => {
+      const date = new Date();
+      const obj = { date: date };
+      const optimized = StringOptimizer.optimizePaths(obj);
+      expect(optimized.date).toBe(date);
+    });
+
+    test('should handle RegExp objects (non-plain)', () => {
+      const regex = /test/;
+      const obj = { regex: regex };
+      const optimized = StringOptimizer.optimizePaths(obj);
+      expect(optimized.regex).toBe(regex);
+    });
+
+    test('should handle mixed content', () => {
+      const obj = {
+        str: 'string',
+        num: 123,
+        bool: true,
+        arr: ['a', 'b'],
+        nested: { key: 'value' },
+        date: new Date()
+      };
+      const optimized = StringOptimizer.optimizePaths(obj);
+      expect(optimized.str).toBe('string');
+      expect(optimized.num).toBe(123);
+      expect(optimized.bool).toBe(true);
+    });
+  });
+
+  describe('batchIntern', () => {
+    test('should intern multiple strings', () => {
+      const strings = ['test1', 'test2', 'test3'];
+      const interned = StringOptimizer.batchIntern(strings);
+      expect(interned).toEqual(strings);
+      expect(StringOptimizer.internedStrings.has('test1')).toBe(true);
+      expect(StringOptimizer.internedStrings.has('test2')).toBe(true);
+      expect(StringOptimizer.internedStrings.has('test3')).toBe(true);
+    });
+
+    test('should return non-array input as-is', () => {
+      expect(StringOptimizer.batchIntern('string')).toBe('string');
+      expect(StringOptimizer.batchIntern(123)).toBe(123);
+      expect(StringOptimizer.batchIntern(null)).toBe(null);
+    });
+
+    test('should handle empty array', () => {
+      const result = StringOptimizer.batchIntern([]);
+      expect(result).toEqual([]);
+    });
+
+    test('should handle large batches', () => {
+      const strings = Array.from({ length: 100 }, (_, i) => `string${i}`);
+      const interned = StringOptimizer.batchIntern(strings);
+      expect(interned.length).toBe(100);
+    });
+  });
+
+  describe('getMemoryUsage', () => {
+    test('should return memory usage estimate', () => {
+      StringOptimizer.clearCaches();
+      StringOptimizer.intern('test string');
+      StringOptimizer.buildPath('root', 'child');
+      
+      const usage = StringOptimizer.getMemoryUsage();
+      expect(usage).toHaveProperty('estimatedBytes');
+      expect(usage).toHaveProperty('estimatedKB');
+      expect(usage).toHaveProperty('internedStrings');
+      expect(usage).toHaveProperty('pathCache');
+    });
+
+    test('should calculate memory for multiple strings', () => {
+      StringOptimizer.clearCaches();
+      
+      for (let i = 0; i < 10; i++) {
+        StringOptimizer.intern(`string${i}`);
+        StringOptimizer.buildPath('root', `child${i}`);
+      }
+      
+      const usage = StringOptimizer.getMemoryUsage();
+      expect(usage.estimatedBytes).toBeGreaterThan(0);
+      expect(usage.estimatedKB).toBeGreaterThan(0);
+      expect(usage.internedStrings).toBeGreaterThan(0);
+      expect(usage.pathCache).toBeGreaterThan(0);
+    });
+
+    test('should show zero for empty caches', () => {
+      StringOptimizer.clearCaches();
+      const usage = StringOptimizer.getMemoryUsage();
+      expect(usage.estimatedBytes).toBe(0);
+      expect(usage.estimatedKB).toBe(0);
+      expect(usage.internedStrings).toBe(0);
+      expect(usage.pathCache).toBe(0);
+    });
+  });
 });

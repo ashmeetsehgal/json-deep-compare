@@ -4,6 +4,8 @@
  * @description Intelligent mode selection based on object characteristics and options
  */
 
+const CommonUtils = require('./CommonUtils');
+
 /**
  * Smart mode selector that analyzes objects to determine optimal comparison mode
  * @private
@@ -107,7 +109,7 @@ class SmartModeSelector {
     }
     
     // Check for non-plain objects that need special handling
-    if (!this.isPlainObject(obj1) || !this.isPlainObject(obj2)) {
+    if (!CommonUtils.isPlainObject(obj1) || !CommonUtils.isPlainObject(obj2)) {
       return this.compareNonPlainObjects(obj1, obj2);
     }
     
@@ -125,18 +127,6 @@ class SmartModeSelector {
     return true;
   }
 
-  /**
-   * Check if an object is a plain object (not Date, RegExp, Map, Set, etc.)
-   * @param {*} obj - Object to check
-   * @returns {boolean} Whether the object is a plain object
-   */
-  static isPlainObject(obj) {
-    if (obj === null || typeof obj !== 'object') return false;
-    
-    // Check if it's a plain object by verifying constructor and prototype
-    return Object.prototype.toString.call(obj) === '[object Object]' && 
-           (obj.constructor === Object || obj.constructor === undefined);
-  }
 
   /**
    * Compare non-plain objects with type-specific logic
