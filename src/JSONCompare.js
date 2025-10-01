@@ -14,7 +14,6 @@ const FastComparator = require('./FastComparator');
 const BooleanComparator = require('./BooleanComparator');
 const PerformanceMonitor = require('./PerformanceMonitor');
 const AdaptiveComparator = require('./AdaptiveComparator');
-const ErrorHandler = require('./ErrorHandler');
 
 /**
  * Class for comparing JSON objects
@@ -31,13 +30,7 @@ class JSONCompare {
    * @param {boolean} [options.matchKeysByName=false] - Whether to match regex by key name instead of only by path
    */
   constructor(options = {}) {
-    // Validate and sanitize options for better reliability
-    const validation = ErrorHandler.validateOptions(options);
-    if (!validation.isValid) {
-      console.warn('JSONCompare: Invalid options provided:', validation.errors);
-    }
-    
-    this.options = new Options(validation.sanitized);
+    this.options = new Options(options);
     this.useFastMode = FastComparator.shouldUseFastMode(this.options);
     this.useUltraFastMode = this.shouldUseUltraFastMode();
     
@@ -69,31 +62,8 @@ class JSONCompare {
    * @returns {Object} Comparison result
    */
   compare(obj1, obj2) {
-    // Validate inputs for better reliability
-    const validation = ErrorHandler.validateInputs(obj1, obj2, 'compare');
-    if (!validation.isValid) {
-      console.warn('JSONCompare: Invalid inputs provided:', validation.errors);
-    }
-
-    // Handle special cases for better reliability
-    if (validation.isNullComparison) {
-      return { summary: { matchPercentage: 100, totalKeysCompared: 0 }, matched: { values: [] }, unmatched: { values: [], keys: [], types: [] }, regexChecks: { passed: [], failed: [] } };
-    }
-
-    if (validation.isUndefinedComparison) {
-      return { summary: { matchPercentage: 100, totalKeysCompared: 0 }, matched: { values: [] }, unmatched: { values: [], keys: [], types: [] }, regexChecks: { passed: [], failed: [] } };
-    }
-
-    if (validation.isNullUndefinedComparison) {
-      return { summary: { matchPercentage: 0, totalKeysCompared: 1 }, matched: { values: [] }, unmatched: { values: [{ path: '', expected: obj1, actual: obj2, message: 'null vs undefined' }], keys: [], types: [] }, regexChecks: { passed: [], failed: [] } };
-    }
-
-    // Use adaptive comparator for intelligent mode selection with error handling
-    return ErrorHandler.safeExecute(
-      () => AdaptiveComparator.compare(obj1, obj2, this.options),
-      'JSONCompare.compare',
-      { summary: { matchPercentage: 0, totalKeysCompared: 0 }, matched: { values: [] }, unmatched: { values: [], keys: [], types: [] }, regexChecks: { passed: [], failed: [] } }
-    );
+    // Use adaptive comparator for intelligent mode selection
+    return AdaptiveComparator.compare(obj1, obj2, this.options);
   }
 
   /**
@@ -104,11 +74,7 @@ class JSONCompare {
    */
   isEqual(obj1, obj2) {
     return PerformanceMonitor.track('boolean', () => {
-      return ErrorHandler.safeExecute(
-        () => BooleanComparator.booleanCompare(obj1, obj2),
-        'JSONCompare.isEqual',
-        false
-      );
+      return BooleanComparator.booleanCompare(obj1, obj2);
     });
   }
 

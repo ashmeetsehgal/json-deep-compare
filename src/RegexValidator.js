@@ -93,14 +93,16 @@ class RegexValidator {
     for (const [keyPath, regex] of Object.entries(this.compiledRegexChecks)) {
       let shouldCheck = false;
       
-      // Exact path match
+      // Exact full path match (e.g., 'user.email' === 'user.email')
       if (keyPath === path) {
         shouldCheck = true;
       } 
-      // Key name match (when enabled)
-      else if (this.options.matchKeysByName) {
+      // Partial path match / Key name match (enabled by default, disabled if matchKeysByName is explicitly false)
+      // This handles cases like path='user.email' matching keyPath='email'
+      else if (this.options.matchKeysByName !== false) {
         const keyName = PathUtils.getKeyNameFromPath(path);
-        if (keyName === keyPath) {
+        if (keyName === keyPath && keyName !== path) {
+          // Only match by key name if it's actually a partial path (has dots)
           shouldCheck = true;
         }
       }

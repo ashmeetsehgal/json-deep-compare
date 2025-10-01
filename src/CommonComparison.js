@@ -50,6 +50,27 @@ class CommonComparison {
    */
   static primitiveCompare(obj1, obj2) {
     if (typeof obj1 !== 'object') {
+      // Handle NaN comparison - for comparison purposes, NaN === NaN
+      if (typeof obj1 === 'number' && typeof obj2 === 'number') {
+        if (isNaN(obj1) && isNaN(obj2)) return true; // NaN === NaN for comparison
+      }
+      return obj1 === obj2;
+    }
+    return null; // Not a primitive case
+  }
+
+  /**
+   * Fast primitive comparison for BooleanComparator - NaN !== NaN
+   * @param {*} obj1 - First object
+   * @param {*} obj2 - Second object
+   * @returns {boolean|null} Comparison result, or null if not primitive case
+   */
+  static primitiveCompareStrict(obj1, obj2) {
+    if (typeof obj1 !== 'object') {
+      // Handle NaN comparison - NaN !== NaN in JavaScript (for BooleanComparator)
+      if (typeof obj1 === 'number' && typeof obj2 === 'number') {
+        if (isNaN(obj1) && isNaN(obj2)) return false; // NaN !== NaN
+      }
       return obj1 === obj2;
     }
     return null; // Not a primitive case
@@ -158,9 +179,10 @@ class CommonComparison {
    * Common early exit checks - reduces duplication in comparison methods
    * @param {*} obj1 - First object
    * @param {*} obj2 - Second object
+   * @param {boolean} [strict=false] - Whether to use strict NaN comparison
    * @returns {Object} Result with early exit info
    */
-  static performEarlyChecks(obj1, obj2) {
+  static performEarlyChecks(obj1, obj2, strict = false) {
     // Fastest possible: reference equality
     if (this.referenceEqual(obj1, obj2)) {
       return { shouldExit: true, result: true };
@@ -178,7 +200,7 @@ class CommonComparison {
     }
     
     // Fast primitive comparison
-    const primitiveResult = this.primitiveCompare(obj1, obj2);
+    const primitiveResult = strict ? this.primitiveCompareStrict(obj1, obj2) : this.primitiveCompare(obj1, obj2);
     if (primitiveResult !== null) {
       return { shouldExit: true, result: primitiveResult };
     }

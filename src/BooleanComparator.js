@@ -17,8 +17,8 @@ class BooleanComparator {
    * @returns {boolean} Comparison result
    */
   static booleanCompare(obj1, obj2) {
-    // Use common early checks to reduce duplication
-    const earlyResult = CommonComparison.performEarlyChecks(obj1, obj2);
+    // Use common early checks to reduce duplication (with strict NaN comparison)
+    const earlyResult = CommonComparison.performEarlyChecks(obj1, obj2, true);
     if (earlyResult.shouldExit) {
       return earlyResult.result;
     }

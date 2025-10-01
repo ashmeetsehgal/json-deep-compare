@@ -4,6 +4,8 @@
  * @description Centralized error handling, validation, and reliability improvements
  */
 
+const CommonUtils = require('./CommonUtils');
+
 /**
  * Error handling and reliability utilities
  * @private
@@ -17,12 +19,7 @@ class ErrorHandler {
    * @returns {*} Result of function or fallback value
    */
   static safeExecute(fn, context = 'Unknown', fallback = null) {
-    try {
-      return fn();
-    } catch (error) {
-      console.warn(`Error in ${context}:`, error.message);
-      return fallback;
-    }
+    return CommonUtils.safeExecute(fn, context, fallback);
   }
 
   /**
@@ -109,15 +106,7 @@ class ErrorHandler {
    * @returns {string[]} Array of keys or empty array if error
    */
   static safeGetKeys(obj) {
-    try {
-      if (obj === null || obj === undefined) {
-        return [];
-      }
-      return Object.keys(obj);
-    } catch (error) {
-      console.warn('Error getting object keys:', error.message);
-      return [];
-    }
+    return CommonUtils.safeKeys(obj);
   }
 
   /**
@@ -126,15 +115,7 @@ class ErrorHandler {
    * @returns {Array} Array of values or empty array if error
    */
   static safeGetValues(obj) {
-    try {
-      if (obj === null || obj === undefined) {
-        return [];
-      }
-      return Object.values(obj);
-    } catch (error) {
-      console.warn('Error getting object values:', error.message);
-      return [];
-    }
+    return CommonUtils.safeValues(obj);
   }
 
   /**
@@ -144,15 +125,7 @@ class ErrorHandler {
    * @returns {boolean} Whether object has property
    */
   static safeHasProperty(obj, key) {
-    try {
-      if (obj === null || obj === undefined) {
-        return false;
-      }
-      return Object.prototype.hasOwnProperty.call(obj, key);
-    } catch (error) {
-      console.warn('Error checking object property:', error.message);
-      return false;
-    }
+    return CommonUtils.safeHasProperty(obj, key);
   }
 
   /**
@@ -163,18 +136,7 @@ class ErrorHandler {
    * @returns {*} Property value or default value
    */
   static safeGetProperty(obj, key, defaultValue = undefined) {
-    try {
-      if (obj === null || obj === undefined) {
-        return defaultValue;
-      }
-      if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-        return defaultValue;
-      }
-      return obj[key];
-    } catch (error) {
-      console.warn('Error getting object property:', error.message);
-      return defaultValue;
-    }
+    return CommonUtils.safeGet(obj, key, defaultValue);
   }
 
   /**
@@ -183,15 +145,7 @@ class ErrorHandler {
    * @returns {number} Array length or 0 if error
    */
   static safeGetLength(arr) {
-    try {
-      if (!Array.isArray(arr)) {
-        return 0;
-      }
-      return arr.length;
-    } catch (error) {
-      console.warn('Error getting array length:', error.message);
-      return 0;
-    }
+    return CommonUtils.safeLength(arr);
   }
 
   /**

@@ -177,6 +177,11 @@ class Comparator {
         }
       }
     }
+    
+    // For top-level calls (empty path), ensure summary is updated
+    if (path === '') {
+      this.result.updateSummary();
+    }
   }
 
   /**
@@ -227,6 +232,11 @@ class Comparator {
         actual: arr2[i],
         message: 'Extra element in second array'
       });
+    }
+    
+    // For top-level calls (empty path), ensure summary is updated
+    if (path === '') {
+      this.result.updateSummary();
     }
   }
 

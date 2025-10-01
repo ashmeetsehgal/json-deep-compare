@@ -4,8 +4,6 @@
  * @description String interning, caching, and optimization for memory efficiency
  */
 
-const CacheStatistics = require('./CacheStatistics');
-
 /**
  * String optimization class for memory efficiency
  * @private
@@ -14,12 +12,9 @@ class StringOptimizer {
   static internedStrings = new Map();
   static pathCache = new Map();
   static maxCacheSize = 1000;
+  static cacheHits = 0;
+  static cacheMisses = 0;
   static cacheAdditions = 0;
-  
-  static {
-    // Initialize cache statistics using common utility
-    CacheStatistics.initialize(StringOptimizer);
-  }
 
   /**
    * Intern a string to reduce memory usage for repeated strings
@@ -32,12 +27,12 @@ class StringOptimizer {
     
     // Check cache first
     if (this.internedStrings.has(str)) {
-      CacheStatistics.recordHit(StringOptimizer);
+      this.cacheHits++;
       return this.internedStrings.get(str);
     }
     
     // Record cache miss immediately (string not found in cache)
-    CacheStatistics.recordMiss(StringOptimizer);
+    this.cacheMisses++;
     
     // Add to cache if not too large
     if (this.internedStrings.size < this.maxCacheSize) {
@@ -124,8 +119,9 @@ class StringOptimizer {
   static clearCaches() {
     this.internedStrings.clear();
     this.pathCache.clear();
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
     this.cacheAdditions = 0;
-    CacheStatistics.reset(StringOptimizer);
   }
 
   /**
@@ -133,13 +129,15 @@ class StringOptimizer {
    * @returns {Object} Cache statistics
    */
   static getCacheStats() {
-    const baseStats = CacheStatistics.getStats(StringOptimizer);
+    const totalRequests = this.cacheHits + this.cacheMisses;
     return {
       internedStrings: this.internedStrings.size,
       pathCache: this.pathCache.size,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
       cacheAdditions: this.cacheAdditions,
-      maxCacheSize: this.maxCacheSize,
-      ...baseStats
+      hitRatio: totalRequests > 0 ? this.cacheHits / totalRequests : 0,
+      maxCacheSize: this.maxCacheSize
     };
   }
 

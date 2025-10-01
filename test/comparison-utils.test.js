@@ -319,7 +319,7 @@ describe('ComparisonUtils Tests', () => {
 
   describe('Edge Cases', () => {
     test('should handle special values in comparisons', () => {
-      expect(ComparisonUtils.primitiveCompare(NaN, NaN)).toBe(false);
+      expect(ComparisonUtils.primitiveCompare(NaN, NaN)).toBe(true); // For comparison purposes, NaN === NaN
       expect(ComparisonUtils.primitiveCompare(Infinity, Infinity)).toBe(true);
       expect(ComparisonUtils.primitiveCompare(-Infinity, -Infinity)).toBe(true);
     });

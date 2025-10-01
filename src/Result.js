@@ -157,6 +157,7 @@ class Result {
    */
   addMatchedKey(path) {
     this.data.matched.keys.push(path);
+    this.updateSummary();
   }
 
   /**
@@ -168,6 +169,7 @@ class Result {
    */
   addMatchedValue(match) {
     this.data.matched.values.push(match);
+    this.updateSummary();
   }
 
   /**
@@ -179,6 +181,7 @@ class Result {
    */
   addUnmatchedKey(unmatch) {
     this.data.unmatched.keys.push(unmatch);
+    this.updateSummary();
   }
 
   /**
@@ -191,6 +194,7 @@ class Result {
    */
   addUnmatchedValue(unmatch) {
     this.data.unmatched.values.push(unmatch);
+    this.updateSummary();
   }
 
   /**
@@ -203,6 +207,7 @@ class Result {
    */
   addUnmatchedType(unmatch) {
     this.data.unmatched.types.push(unmatch);
+    this.updateSummary();
   }
 
   /**
@@ -264,5 +269,8 @@ class Result {
     return this.data;
   }
 }
+
+// Expose ResultPool for testing
+Result.ResultPool = ResultPool;
 
 module.exports = Result;

@@ -50,6 +50,10 @@ class ComparisonUtils {
    */
   static primitiveCompare(obj1, obj2) {
     if (typeof obj1 !== 'object') {
+      // Handle NaN comparison - for comparison purposes, NaN === NaN
+      if (typeof obj1 === 'number' && typeof obj2 === 'number') {
+        if (isNaN(obj1) && isNaN(obj2)) return true; // NaN === NaN for comparison
+      }
       return obj1 === obj2;
     }
     return null; // Not a primitive case

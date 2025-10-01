@@ -218,7 +218,8 @@ class UltraFastComparator {
           return this.ultraFastCompareObjectsWithCounts(obj1, obj1);
         }
       }
-      return { matchPercentage: 100, totalKeysCompared: 1, totalMatched: 1, totalUnmatched: 0 };
+      // Primitives (null, undefined, numbers, strings, etc.) don't have keys to compare
+      return { matchPercentage: 100, totalKeysCompared: 0, totalMatched: 0, totalUnmatched: 0 };
     }
     
     // Fast type check
