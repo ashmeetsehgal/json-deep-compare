@@ -12,7 +12,6 @@ const AdvancedCache = require('./AdvancedCache');
  */
 class TypeDetector {
   static typeCache = new WeakMap();
-  static primitiveTypeCache = new Map();
   
   /**
    * Get the specific type of a value with advanced caching
@@ -60,7 +59,6 @@ class TypeDetector {
    */
   static clearCache() {
     this.typeCache = new WeakMap();
-    this.primitiveTypeCache.clear();
   }
   
   /**
@@ -68,7 +66,7 @@ class TypeDetector {
    */
   static getCacheStats() {
     return {
-      primitiveTypes: this.primitiveTypeCache.size
+      typeCache: this.typeCache.size
     };
   }
 }
