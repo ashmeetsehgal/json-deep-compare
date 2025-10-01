@@ -4,6 +4,73 @@
  */
 
 /**
+ * Object pool for Result instances to reduce garbage collection overhead
+ * @private
+ */
+class ResultPool {
+  static pool = [];
+  static maxPoolSize = 50; // Prevent memory leaks from unbounded growth
+  static created = 0;
+  static reused = 0;
+
+  /**
+   * Get a Result instance from the pool or create a new one
+   * @param {Object} options - Options for the Result instance
+   * @returns {Result} A Result instance
+   */
+  static acquire(options = {}) {
+    let result;
+    if (this.pool.length > 0) {
+      result = this.pool.pop();
+      result.options = options;
+      result.reset();
+      this.reused++;
+    } else {
+      result = new Result(options);
+      this.created++;
+    }
+    return result;
+  }
+
+  /**
+   * Return a Result instance to the pool
+   * @param {Result} result - The Result instance to return
+   */
+  static release(result) {
+    if (this.pool.length < this.maxPoolSize) {
+      // Clear sensitive data before returning to pool
+      result.reset();
+      result.options = {};
+      this.pool.push(result);
+    }
+    // If pool is full, let it be garbage collected
+  }
+
+  /**
+   * Clear the entire pool (useful for testing or memory management)
+   */
+  static clear() {
+    this.pool.length = 0;
+    this.created = 0;
+    this.reused = 0;
+  }
+
+  /**
+   * Get pool statistics
+   * @returns {Object} Pool statistics
+   */
+  static getStats() {
+    return {
+      poolSize: this.pool.length,
+      maxPoolSize: this.maxPoolSize,
+      totalCreated: this.created,
+      totalReused: this.reused,
+      reuseRatio: this.created > 0 ? this.reused / this.created : 0
+    };
+  }
+}
+
+/**
  * Class for managing JSON comparison results
  */
 class Result {
@@ -17,31 +84,71 @@ class Result {
   }
 
   /**
-   * Reset the result structure
+   * Create a new Result instance using object pooling
+   * @param {Object} options - Options instance for result calculation
+   * @returns {Result} A Result instance from the pool
+   * @static
+   */
+  static create(options = {}) {
+    return ResultPool.acquire(options);
+  }
+
+  /**
+   * Release this Result instance back to the pool
+   * @returns {Object} The final result data before release
+   */
+  release() {
+    const finalResult = this.getResult();
+    ResultPool.release(this);
+    return finalResult;
+  }
+
+  /**
+   * Reset the result structure with optimized array clearing
    */
   reset() {
-    this.data = {
-      matched: {
-        keys: [],
-        values: []
-      },
-      unmatched: {
-        keys: [],
-        values: [],
-        types: []
-      },
-      regexChecks: {
-        passed: [],
-        failed: []
-      },
-      summary: {
-        matchPercentage: 0,
-        totalKeysCompared: 0,
-        totalMatched: 0,
-        totalUnmatched: 0,
-        totalRegexChecks: 0
-      }
-    };
+    // Reuse existing arrays when possible to reduce allocation
+    if (this.data) {
+      // Clear arrays efficiently
+      this.data.matched.keys.length = 0;
+      this.data.matched.values.length = 0;
+      this.data.unmatched.keys.length = 0;
+      this.data.unmatched.values.length = 0;
+      this.data.unmatched.types.length = 0;
+      this.data.regexChecks.passed.length = 0;
+      this.data.regexChecks.failed.length = 0;
+      
+      // Reset summary
+      this.data.summary.matchPercentage = 0;
+      this.data.summary.totalKeysCompared = 0;
+      this.data.summary.totalMatched = 0;
+      this.data.summary.totalUnmatched = 0;
+      this.data.summary.totalRegexChecks = 0;
+    } else {
+      // First time initialization
+      this.data = {
+        matched: {
+          keys: [],
+          values: []
+        },
+        unmatched: {
+          keys: [],
+          values: [],
+          types: []
+        },
+        regexChecks: {
+          passed: [],
+          failed: []
+        },
+        summary: {
+          matchPercentage: 0,
+          totalKeysCompared: 0,
+          totalMatched: 0,
+          totalUnmatched: 0,
+          totalRegexChecks: 0
+        }
+      };
+    }
   }
 
   /**
@@ -50,6 +157,7 @@ class Result {
    */
   addMatchedKey(path) {
     this.data.matched.keys.push(path);
+    this.updateSummary();
   }
 
   /**
@@ -61,6 +169,7 @@ class Result {
    */
   addMatchedValue(match) {
     this.data.matched.values.push(match);
+    this.updateSummary();
   }
 
   /**
@@ -72,6 +181,7 @@ class Result {
    */
   addUnmatchedKey(unmatch) {
     this.data.unmatched.keys.push(unmatch);
+    this.updateSummary();
   }
 
   /**
@@ -84,6 +194,7 @@ class Result {
    */
   addUnmatchedValue(unmatch) {
     this.data.unmatched.values.push(unmatch);
+    this.updateSummary();
   }
 
   /**
@@ -96,6 +207,7 @@ class Result {
    */
   addUnmatchedType(unmatch) {
     this.data.unmatched.types.push(unmatch);
+    this.updateSummary();
   }
 
   /**
@@ -127,7 +239,8 @@ class Result {
    * Calculate and update the summary
    */
   updateSummary() {
-    const totalMatched = this.data.matched.keys.length;
+    // Count both matched keys and matched values
+    const totalMatched = this.data.matched.keys.length + this.data.matched.values.length;
     
     // If strictTypes is false, don't count type mismatches as unmatched items
     const strictTypes = this.options.strictTypes !== undefined ? this.options.strictTypes : true;
@@ -140,8 +253,12 @@ class Result {
     const totalKeysCompared = totalMatched + totalUnmatched;
     const totalRegexChecks = this.data.regexChecks.passed.length + this.data.regexChecks.failed.length;
 
+    // Calculate percentage and round to 2 decimal places for consistency
+    const rawPercentage = totalKeysCompared > 0 ? (totalMatched / totalKeysCompared) * 100 : 100;
+    const matchPercentage = Math.round(rawPercentage * 100) / 100;
+
     this.data.summary = {
-      matchPercentage: totalKeysCompared > 0 ? (totalMatched / totalKeysCompared) * 100 : 100,
+      matchPercentage,
       totalKeysCompared,
       totalMatched,
       totalUnmatched,
@@ -157,5 +274,8 @@ class Result {
     return this.data;
   }
 }
+
+// Expose ResultPool for testing
+Result.ResultPool = ResultPool;
 
 module.exports = Result;
