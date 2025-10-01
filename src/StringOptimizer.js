@@ -4,6 +4,8 @@
  * @description String interning, caching, and optimization for memory efficiency
  */
 
+const CacheStatistics = require('./CacheStatistics');
+
 /**
  * String optimization class for memory efficiency
  * @private
@@ -12,9 +14,12 @@ class StringOptimizer {
   static internedStrings = new Map();
   static pathCache = new Map();
   static maxCacheSize = 1000;
-  static cacheHits = 0;
-  static cacheMisses = 0;
   static cacheAdditions = 0;
+  
+  static {
+    // Initialize cache statistics using common utility
+    CacheStatistics.initialize(StringOptimizer);
+  }
 
   /**
    * Intern a string to reduce memory usage for repeated strings
@@ -27,12 +32,12 @@ class StringOptimizer {
     
     // Check cache first
     if (this.internedStrings.has(str)) {
-      this.cacheHits++;
+      CacheStatistics.recordHit(StringOptimizer);
       return this.internedStrings.get(str);
     }
     
     // Record cache miss immediately (string not found in cache)
-    this.cacheMisses++;
+    CacheStatistics.recordMiss(StringOptimizer);
     
     // Add to cache if not too large
     if (this.internedStrings.size < this.maxCacheSize) {
@@ -119,9 +124,8 @@ class StringOptimizer {
   static clearCaches() {
     this.internedStrings.clear();
     this.pathCache.clear();
-    this.cacheHits = 0;
-    this.cacheMisses = 0;
     this.cacheAdditions = 0;
+    CacheStatistics.reset(StringOptimizer);
   }
 
   /**
@@ -129,15 +133,13 @@ class StringOptimizer {
    * @returns {Object} Cache statistics
    */
   static getCacheStats() {
-    const totalRequests = this.cacheHits + this.cacheMisses;
+    const baseStats = CacheStatistics.getStats(StringOptimizer);
     return {
       internedStrings: this.internedStrings.size,
       pathCache: this.pathCache.size,
-      cacheHits: this.cacheHits,
-      cacheMisses: this.cacheMisses,
       cacheAdditions: this.cacheAdditions,
-      hitRatio: totalRequests > 0 ? this.cacheHits / totalRequests : 0,
-      maxCacheSize: this.maxCacheSize
+      maxCacheSize: this.maxCacheSize,
+      ...baseStats
     };
   }
 

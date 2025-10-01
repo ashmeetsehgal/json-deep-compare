@@ -4,6 +4,8 @@
  * @description Maximum performance comparison with minimal overhead
  */
 
+const CommonComparison = require('./CommonComparison');
+
 /**
  * Ultra-fast comparison class - optimized for maximum speed
  */
@@ -15,20 +17,14 @@ class UltraFastComparator {
    * @returns {boolean} Simple boolean result
    */
   static ultraFastCompare(obj1, obj2) {
-    // Fastest possible: reference equality
-    if (obj1 === obj2) return true;
-    
-    // Fast type check
-    if (typeof obj1 !== typeof obj2) return false;
-    
-    // Fast null check
-    if (obj1 == null || obj2 == null) return obj1 === obj2;
-    
-    // Fast primitive comparison
-    if (typeof obj1 !== 'object') return obj1 === obj2;
+    // Use common early checks to reduce duplication
+    const earlyResult = CommonComparison.performEarlyChecks(obj1, obj2);
+    if (earlyResult.shouldExit) {
+      return earlyResult.result;
+    }
     
     // Fast array comparison
-    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+    if (CommonComparison.bothArrays(obj1, obj2)) {
       return this.ultraFastCompareArrays(obj1, obj2);
     }
     
@@ -43,22 +39,7 @@ class UltraFastComparator {
    * @returns {boolean} Comparison result
    */
   static ultraFastCompareArrays(arr1, arr2) {
-    const len = arr1.length;
-    
-    // Fast length check
-    if (len !== arr2.length) return false;
-    
-    // Fast empty check
-    if (len === 0) return true;
-    
-    // Ultra-fast element comparison with early exit
-    for (let i = 0; i < len; i++) {
-      if (!this.ultraFastCompare(arr1[i], arr2[i])) {
-        return false;
-      }
-    }
-    
-    return true;
+    return CommonComparison.compareArrays(arr1, arr2, this.ultraFastCompare.bind(this));
   }
 
   /**
@@ -75,24 +56,7 @@ class UltraFastComparator {
       return false;
     }
 
-    const keys1 = Object.keys(obj1);
-    const len = keys1.length;
-    
-    // Fast key count check
-    if (len !== Object.keys(obj2).length) return false;
-    
-    // Fast empty check
-    if (len === 0) return true;
-    
-    // Ultra-fast key-value comparison with early exit
-    for (let i = 0; i < len; i++) {
-      const key = keys1[i];
-      if (!Object.prototype.hasOwnProperty.call(obj2, key) || !this.ultraFastCompare(obj1[key], obj2[key])) {
-        return false;
-      }
-    }
-    
-    return true;
+    return CommonComparison.compareObjects(obj1, obj2, this.ultraFastCompare.bind(this));
   }
 
   /**
