@@ -4,6 +4,8 @@
  * @description Maximum performance comparison with minimal overhead
  */
 
+const CommonComparison = require('./CommonComparison');
+
 /**
  * Ultra-fast comparison class - optimized for maximum speed
  */
@@ -15,20 +17,14 @@ class UltraFastComparator {
    * @returns {boolean} Simple boolean result
    */
   static ultraFastCompare(obj1, obj2) {
-    // Fastest possible: reference equality
-    if (obj1 === obj2) return true;
-    
-    // Fast type check
-    if (typeof obj1 !== typeof obj2) return false;
-    
-    // Fast null check
-    if (obj1 == null || obj2 == null) return obj1 === obj2;
-    
-    // Fast primitive comparison
-    if (typeof obj1 !== 'object') return obj1 === obj2;
+    // Use common early checks to reduce duplication
+    const earlyResult = CommonComparison.performEarlyChecks(obj1, obj2);
+    if (earlyResult.shouldExit) {
+      return earlyResult.result;
+    }
     
     // Fast array comparison
-    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+    if (CommonComparison.bothArrays(obj1, obj2)) {
       return this.ultraFastCompareArrays(obj1, obj2);
     }
     
@@ -43,22 +39,7 @@ class UltraFastComparator {
    * @returns {boolean} Comparison result
    */
   static ultraFastCompareArrays(arr1, arr2) {
-    const len = arr1.length;
-    
-    // Fast length check
-    if (len !== arr2.length) return false;
-    
-    // Fast empty check
-    if (len === 0) return true;
-    
-    // Ultra-fast element comparison with early exit
-    for (let i = 0; i < len; i++) {
-      if (!this.ultraFastCompare(arr1[i], arr2[i])) {
-        return false;
-      }
-    }
-    
-    return true;
+    return CommonComparison.compareArrays(arr1, arr2, this.ultraFastCompare.bind(this));
   }
 
   /**
@@ -75,24 +56,7 @@ class UltraFastComparator {
       return false;
     }
 
-    const keys1 = Object.keys(obj1);
-    const len = keys1.length;
-    
-    // Fast key count check
-    if (len !== Object.keys(obj2).length) return false;
-    
-    // Fast empty check
-    if (len === 0) return true;
-    
-    // Ultra-fast key-value comparison with early exit
-    for (let i = 0; i < len; i++) {
-      const key = keys1[i];
-      if (!Object.prototype.hasOwnProperty.call(obj2, key) || !this.ultraFastCompare(obj1[key], obj2[key])) {
-        return false;
-      }
-    }
-    
-    return true;
+    return CommonComparison.compareObjects(obj1, obj2, this.ultraFastCompare.bind(this));
   }
 
   /**
@@ -181,7 +145,7 @@ class UltraFastComparator {
     // Ultra-fast key-value comparison with early exit
     for (let i = 0; i < len1; i++) {
       const key = keys1[i];
-      if (!Object.prototype.hasOwnProperty.call(obj2, key)) {
+      if (!Object.hasOwn(obj2, key)) {
         unmatched++;
         continue;
       }
@@ -219,20 +183,46 @@ class UltraFastComparator {
    * @returns {Object} Simple result
    */
   static ultraFastCompareWithResult(obj1, obj2) {
-    const result = this.ultraFastCompareWithCounts(obj1, obj2);
+    const counts = this.ultraFastCompareWithCounts(obj1, obj2);
     
-    return {
+    // For top-level matching primitives (null===null, undefined===undefined, etc.)
+    // adjust totalKeysCompared to 0 (no structure to compare)
+    let adjustedTotalKeysCompared = counts.totalKeysCompared;
+    let adjustedTotalMatched = counts.totalMatched;
+    
+    const isPrimitive = (typeof obj1 !== 'object' || obj1 === null) && (typeof obj2 !== 'object' || obj2 === null);
+    if (isPrimitive && obj1 === obj2) {
+      // Matching primitives have no structure to compare
+      adjustedTotalKeysCompared = 0;
+      adjustedTotalMatched = 0;
+    }
+    
+    const resultObj = {
       matched: { keys: [], values: [] },
       unmatched: { keys: [], values: [], types: [] },
       regexChecks: { passed: [], failed: [] },
       summary: {
-        matchPercentage: result.matchPercentage,
-        totalKeysCompared: result.totalKeysCompared,
-        totalMatched: result.totalMatched,
-        totalUnmatched: result.totalUnmatched,
+        matchPercentage: counts.matchPercentage,
+        totalKeysCompared: adjustedTotalKeysCompared,
+        totalMatched: adjustedTotalMatched,
+        totalUnmatched: counts.totalUnmatched,
         totalRegexChecks: 0
       }
     };
+    
+    // For top-level primitive comparisons, populate the result arrays
+    // This is needed for tests that expect detailed comparison results
+    if (isPrimitive && counts.totalUnmatched > 0) {
+      // Add unmatched value for primitive mismatches
+      resultObj.unmatched.values.push({
+        path: '',
+        expected: obj1,
+        actual: obj2,
+        message: 'Values do not match'
+      });
+    }
+    
+    return resultObj;
   }
 
   /**
@@ -254,6 +244,8 @@ class UltraFastComparator {
           return this.ultraFastCompareObjectsWithCounts(obj1, obj1);
         }
       }
+      // Primitives that match: count as 1 matched for value counting in objects
+      // totalKeysCompared will be 1 (from totalMatched + totalUnmatched)
       return { matchPercentage: 100, totalKeysCompared: 1, totalMatched: 1, totalUnmatched: 0 };
     }
     
