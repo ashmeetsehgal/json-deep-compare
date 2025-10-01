@@ -142,9 +142,10 @@ class SmartModeSelector {
    * Compare non-plain objects with type-specific logic
    * @param {*} obj1 - First object
    * @param {*} obj2 - Second object
+   * @param {WeakMap} visitedPairs - Map of obj1 -> WeakSet of obj2 to prevent circular references
    * @returns {boolean} Whether objects are identical
    */
-  static compareNonPlainObjects(obj1, obj2) {
+  static compareNonPlainObjects(obj1, obj2, visitedPairs = new WeakMap()) {
     // Different types are not equal
     if (obj1.constructor !== obj2.constructor) return false;
     
@@ -163,7 +164,7 @@ class SmartModeSelector {
       if (obj1.size !== obj2.size) return false;
       for (const [key, value] of obj1) {
         if (!obj2.has(key)) return false;
-        if (!this.areObjectsIdentical(value, obj2.get(key))) return false;
+        if (!this.areObjectsIdentical(value, obj2.get(key), visitedPairs)) return false;
       }
       return true;
     }
@@ -172,7 +173,15 @@ class SmartModeSelector {
     if (obj1 instanceof Set) {
       if (obj1.size !== obj2.size) return false;
       for (const value of obj1) {
-        if (!obj2.has(value)) return false;
+        // Use deep comparison for Set elements (O(n²) but handles objects correctly)
+        let found = false;
+        for (const otherValue of obj2) {
+          if (this.areObjectsIdentical(value, otherValue, visitedPairs)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) return false;
       }
       return true;
     }
@@ -369,7 +378,7 @@ class SmartModeSelector {
    */
   static getSelectionReasoning(objectAnalysis, optionsAnalysis, selectedMode) {
     if (selectedMode === 'ultraFast') {
-      if (objectAnalysis.isIdentical) return 'Objects are identical (reference equality)';
+      if (objectAnalysis.isIdentical) return 'Objects are identical';
       return 'Simple objects with basic options - using ultra-fast mode';
     }
 

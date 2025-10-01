@@ -11,7 +11,6 @@ const AdvancedCache = require('./AdvancedCache');
  * @private
  */
 class TypeDetector {
-  static typeCache = new WeakMap();
   
   /**
    * Get the specific type of a value with advanced caching
@@ -48,8 +47,7 @@ class TypeDetector {
       type = (constructorName && constructorName !== 'object') ? constructorName : 'object';
     }
     
-    // Cache the result in both caches
-    this.typeCache.set(value, type);
+    // Cache the result
     AdvancedCache.cacheType(value, type);
     return type;
   }
@@ -58,16 +56,14 @@ class TypeDetector {
    * Clear the type cache (useful for testing or memory management)
    */
   static clearCache() {
-    this.typeCache = new WeakMap();
+    AdvancedCache.clearAllCaches();
   }
   
   /**
    * Get cache statistics
    */
   static getCacheStats() {
-    return {
-      typeCache: this.typeCache.size
-    };
+    return AdvancedCache.getCacheStats();
   }
 }
 
@@ -335,6 +331,52 @@ class Comparator {
   }
 
   /**
+   * Deep comparison helper for Map values and other nested structures
+   * @param {*} val1 - First value
+   * @param {*} val2 - Second value
+   * @returns {boolean} Whether values are deeply equal
+   */
+  deepCompareValues(val1, val2) {
+    // Handle null/undefined cases
+    if (val1 === null || val2 === null) return val1 === val2;
+    if (val1 === undefined || val2 === undefined) return val1 === val2;
+    
+    // Handle primitive types
+    if (typeof val1 !== 'object' || typeof val2 !== 'object') {
+      return val1 === val2;
+    }
+    
+    // Handle objects - check if they are plain objects first
+    if (this.isPlainObject(val1) && this.isPlainObject(val2)) {
+      // For plain objects, use recursive comparison
+      return this.deepComparePlainObjects(val1, val2);
+    }
+    
+    // For non-plain objects, use the existing logic
+    return this.compareNonPlainObjects(val1, val2);
+  }
+
+  /**
+   * Deep comparison for plain objects
+   * @param {Object} obj1 - First object
+   * @param {Object} obj2 - Second object
+   * @returns {boolean} Whether objects are deeply equal
+   */
+  deepComparePlainObjects(obj1, obj2) {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    
+    if (keys1.length !== keys2.length) return false;
+    
+    for (const key of keys1) {
+      if (!keys2.includes(key)) return false;
+      if (!this.deepCompareValues(obj1[key], obj2[key])) return false;
+    }
+    
+    return true;
+  }
+
+  /**
    * Compare non-plain objects with type-specific logic
    * @param {*} obj1 - First object
    * @param {*} obj2 - Second object
@@ -359,7 +401,8 @@ class Comparator {
       if (obj1.size !== obj2.size) return false;
       for (const [key, value] of obj1) {
         if (!obj2.has(key)) return false;
-        if (!this.compareNonPlainObjects(value, obj2.get(key))) return false;
+        // Use deep comparison for Map values
+        if (!this.deepCompareValues(value, obj2.get(key))) return false;
       }
       return true;
     }
@@ -381,9 +424,9 @@ class Comparator {
     // ArrayBuffer objects - compare byte lengths and contents
     if (obj1 instanceof ArrayBuffer) {
       if (obj1.byteLength !== obj2.byteLength) return false;
-      return new Uint8Array(obj1).every((byte, index) => 
-        byte === new Uint8Array(obj2)[index]
-      );
+      const a = new Uint8Array(obj1);
+      const b = new Uint8Array(obj2);
+      return a.every((byte, index) => byte === b[index]);
     }
     
     // TypedArray objects - compare length and elements
