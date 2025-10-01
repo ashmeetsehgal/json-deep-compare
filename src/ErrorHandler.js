@@ -83,7 +83,7 @@ class ErrorHandler {
         }
       } else {
         for (const key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          if (Object.hasOwn(obj, key)) {
             if (this.hasCircularReference(obj[key], seen)) {
               return true;
             }
@@ -252,7 +252,7 @@ class ErrorHandler {
           result.sanitized[option] = options[option];
         } else {
           result.errors.push(`${option} must be a boolean`);
-          result.sanitized[option] = option === 'strictTypes' ? true : false;
+          result.sanitized[option] = option === 'strictTypes';
           result.isValid = false;
         }
       }

@@ -4,8 +4,8 @@
  * @description Intelligent caching for type detection, regex patterns, and comparison results
  */
 
-const crypto = require('crypto');
-const util = require('util');
+const crypto = require('node:crypto');
+const util = require('node:util');
 
 /**
  * Advanced caching system for performance optimization

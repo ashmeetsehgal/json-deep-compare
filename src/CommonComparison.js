@@ -52,7 +52,7 @@ class CommonComparison {
     if (typeof obj1 !== 'object') {
       // Handle NaN comparison - for comparison purposes, NaN === NaN
       if (typeof obj1 === 'number' && typeof obj2 === 'number') {
-        if (isNaN(obj1) && isNaN(obj2)) return true; // NaN === NaN for comparison
+        if (Number.isNaN(obj1) && Number.isNaN(obj2)) return true; // NaN === NaN for comparison
       }
       return obj1 === obj2;
     }
@@ -69,7 +69,7 @@ class CommonComparison {
     if (typeof obj1 !== 'object') {
       // Handle NaN comparison - NaN !== NaN in JavaScript (for BooleanComparator)
       if (typeof obj1 === 'number' && typeof obj2 === 'number') {
-        if (isNaN(obj1) && isNaN(obj2)) return false; // NaN !== NaN
+        if (Number.isNaN(obj1) && Number.isNaN(obj2)) return false; // NaN !== NaN
       }
       return obj1 === obj2;
     }
@@ -166,7 +166,7 @@ class CommonComparison {
     // Compare key-value pairs using provided function
     for (let i = 0; i < len; i++) {
       const key = keys1[i];
-      if (!Object.prototype.hasOwnProperty.call(obj2, key) || 
+      if (!Object.hasOwn(obj2, key) || 
           !compareFunction(obj1[key], obj2[key])) {
         return false;
       }

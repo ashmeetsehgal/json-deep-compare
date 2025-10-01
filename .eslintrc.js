@@ -12,7 +12,8 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    'no-useless-escape': 'error'
+    'no-useless-escape': 'error',
+    'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }]
   },
   overrides: [
     {

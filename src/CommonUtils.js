@@ -10,15 +10,14 @@
 class CommonUtils {
   /**
    * Safe warning handler - silently handles errors without console output
-   * @param {string} context - Context where the warning occurred
-   * @param {string} message - Warning message
-   * @param {Error} [error] - Optional error object
+   * @param {string} _context - Context where the warning occurred
+   * @param {string} _message - Warning message
+   * @param {Error} [_error] - Optional error object
    */
-  static safeWarn(context, message, error = null) {
+  static safeWarn(_context, _message, _error) {
     // Intentionally silent - errors are handled gracefully without console output
     // This is a design choice to avoid production console pollution
     // Parameters are accepted for API compatibility but not used
-    void context; void message; void error;
   }
 
   /**
@@ -202,7 +201,7 @@ class CommonUtils {
     if (a === b) return true;
     if (this.isNullOrUndefined(a) && this.isNullOrUndefined(b)) return true;
     if (this.isNumber(a) && this.isNumber(b)) {
-      if (isNaN(a) && isNaN(b)) return true;
+      if (Number.isNaN(a) && Number.isNaN(b)) return true;
       return a === b;
     }
     return false;

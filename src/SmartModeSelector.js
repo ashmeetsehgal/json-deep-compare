@@ -308,7 +308,7 @@ class SmartModeSelector {
   static requiresFullMode(options) {
     return (
       this.hasAdvancedFeatures(options) ||
-      (Object.prototype.hasOwnProperty.call(options, 'ignoreExtraKeys') && options.ignoreExtraKeys === false) // Full mode needed only when explicitly set to false
+      (Object.hasOwn(options, 'ignoreExtraKeys') && options.ignoreExtraKeys === false) // Full mode needed only when explicitly set to false
     );
   }
 

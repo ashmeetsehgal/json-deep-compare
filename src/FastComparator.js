@@ -124,7 +124,7 @@ class FastComparator {
       return { 
         matchPercentage: keys2Len === 0 ? 100 : 0, 
         totalKeys: Math.max(len1, keys2Len), 
-        matched: keys2Len === 0 ? 0 : 0, 
+        matched: 0,  // No keys in obj1 to match
         unmatched: keys2Len === 0 ? 0 : keys2Len 
       };
     }

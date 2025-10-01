@@ -145,7 +145,7 @@ class UltraFastComparator {
     // Ultra-fast key-value comparison with early exit
     for (let i = 0; i < len1; i++) {
       const key = keys1[i];
-      if (!Object.prototype.hasOwnProperty.call(obj2, key)) {
+      if (!Object.hasOwn(obj2, key)) {
         unmatched++;
         continue;
       }
