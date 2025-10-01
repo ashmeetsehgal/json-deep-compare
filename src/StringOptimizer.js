@@ -14,6 +14,7 @@ class StringOptimizer {
   static maxCacheSize = 1000;
   static cacheHits = 0;
   static cacheMisses = 0;
+  static cacheAdditions = 0;
 
   /**
    * Intern a string to reduce memory usage for repeated strings
@@ -30,10 +31,13 @@ class StringOptimizer {
       return this.internedStrings.get(str);
     }
     
+    // Record cache miss immediately (string not found in cache)
+    this.cacheMisses++;
+    
     // Add to cache if not too large
     if (this.internedStrings.size < this.maxCacheSize) {
       this.internedStrings.set(str, str);
-      this.cacheMisses++;
+      this.cacheAdditions++;
     }
     
     return str;
@@ -57,23 +61,16 @@ class StringOptimizer {
       return this.pathCache.get(pathKey);
     }
     
-    // Build path efficiently
-    let result;
-    if (basePath.length > 50) {
-      // Use array join for long paths
-      result = [basePath, key].join('.');
-    } else {
-      // Use template literal for short paths
-      result = `${basePath}.${key}`;
-    }
+    // Record cache miss immediately (path not found in cache)
+    this.cacheMisses++;
     
-    // Cache the result
-    const internedResult = this.intern(result);
+    // Intern the pathKey directly
+    const internedResult = this.intern(pathKey);
     if (this.pathCache.size < this.maxCacheSize) {
       this.pathCache.set(pathKey, internedResult);
+      this.cacheAdditions++;
     }
     
-    this.cacheMisses++;
     return internedResult;
   }
 
@@ -92,23 +89,16 @@ class StringOptimizer {
       return this.pathCache.get(pathKey);
     }
     
-    // Build path efficiently
-    let result;
-    if (index < 10) {
-      // Use concatenation for small indices
-      result = basePath + '[' + index + ']';
-    } else {
-      // Use template literal for larger indices
-      result = `${basePath}[${index}]`;
-    }
+    // Record cache miss immediately (path not found in cache)
+    this.cacheMisses++;
     
-    // Cache the result
-    const internedResult = this.intern(result);
+    // Intern the pathKey directly
+    const internedResult = this.intern(pathKey);
     if (this.pathCache.size < this.maxCacheSize) {
       this.pathCache.set(pathKey, internedResult);
+      this.cacheAdditions++;
     }
     
-    this.cacheMisses++;
     return internedResult;
   }
 
@@ -131,6 +121,7 @@ class StringOptimizer {
     this.pathCache.clear();
     this.cacheHits = 0;
     this.cacheMisses = 0;
+    this.cacheAdditions = 0;
   }
 
   /**
@@ -144,6 +135,7 @@ class StringOptimizer {
       pathCache: this.pathCache.size,
       cacheHits: this.cacheHits,
       cacheMisses: this.cacheMisses,
+      cacheAdditions: this.cacheAdditions,
       hitRatio: totalRequests > 0 ? this.cacheHits / totalRequests : 0,
       maxCacheSize: this.maxCacheSize
     };
