@@ -171,7 +171,7 @@ class PathUtils {
    * @private
    */
   static _estimateDepth(obj, maxDepth = 5) {
-    if (maxDepth <= 0 || typeof obj !== 'object') {
+    if (maxDepth <= 0 || typeof obj !== 'object' || obj === null || obj === undefined) {
       return 0;
     }
 
