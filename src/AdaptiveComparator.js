@@ -77,8 +77,7 @@ class AdaptiveComparator {
   static fastCompare(obj1, obj2) {
     const fastResult = FastComparator.fastCompare(obj1, obj2);
     
-    // Convert fast result to full result format for consistency
-    return {
+    const resultObj = {
       matched: { keys: [], values: [] },
       unmatched: { keys: [], values: [], types: [] },
       regexChecks: { passed: [], failed: [] },
@@ -90,6 +89,20 @@ class AdaptiveComparator {
         totalRegexChecks: 0
       }
     };
+    
+    // For top-level primitive comparisons, populate the result arrays
+    const isPrimitive = (typeof obj1 !== 'object' || obj1 === null) && (typeof obj2 !== 'object' || obj2 === null);
+    if (isPrimitive && fastResult.unmatched > 0) {
+      // Add unmatched value for primitive mismatches
+      resultObj.unmatched.values.push({
+        path: '',
+        expected: obj1,
+        actual: obj2,
+        message: 'Values do not match'
+      });
+    }
+    
+    return resultObj;
   }
 
   /**

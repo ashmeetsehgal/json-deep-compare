@@ -130,6 +130,17 @@ class Comparator {
       this.compareArrays(obj1, obj2, path, visitedPairs);
       return;
     }
+    
+    // Handle array/object type mismatch
+    if (Array.isArray(obj1) !== Array.isArray(obj2)) {
+      this.result.addUnmatchedValue({
+        path: path || '',
+        expected: obj1,
+        actual: obj2,
+        message: `Type mismatch: expected ${Array.isArray(obj1) ? 'array' : 'object'}, got ${Array.isArray(obj2) ? 'array' : 'object'}`
+      });
+      return;
+    }
 
     // Handle different types
     if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
@@ -277,6 +288,7 @@ class Comparator {
       if (this.options.strictTypes) {
         return; // Stop comparison if strict type checking is enabled
       }
+      // If not strict, continue to value comparison below
     }
 
     // Compare values - handle non-plain objects specially

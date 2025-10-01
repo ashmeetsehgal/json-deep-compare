@@ -139,7 +139,7 @@ describe('JSONCompare Tests', () => {
       const result = jsonCompare.compare(null, undefined);
       expect(result.summary.matchPercentage).toBe(0);
       expect(result.summary.totalKeysCompared).toBe(1);
-      expect(result.unmatched.values.length).toBe(1);
+      expect(result.unmatched.types.length).toBe(1); // Type mismatch recorded in types, not values
     });
 
     test('should handle invalid inputs gracefully', () => {

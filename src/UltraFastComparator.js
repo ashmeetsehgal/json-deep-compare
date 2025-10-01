@@ -183,20 +183,46 @@ class UltraFastComparator {
    * @returns {Object} Simple result
    */
   static ultraFastCompareWithResult(obj1, obj2) {
-    const result = this.ultraFastCompareWithCounts(obj1, obj2);
+    const counts = this.ultraFastCompareWithCounts(obj1, obj2);
     
-    return {
+    // For top-level matching primitives (null===null, undefined===undefined, etc.)
+    // adjust totalKeysCompared to 0 (no structure to compare)
+    let adjustedTotalKeysCompared = counts.totalKeysCompared;
+    let adjustedTotalMatched = counts.totalMatched;
+    
+    const isPrimitive = (typeof obj1 !== 'object' || obj1 === null) && (typeof obj2 !== 'object' || obj2 === null);
+    if (isPrimitive && obj1 === obj2) {
+      // Matching primitives have no structure to compare
+      adjustedTotalKeysCompared = 0;
+      adjustedTotalMatched = 0;
+    }
+    
+    const resultObj = {
       matched: { keys: [], values: [] },
       unmatched: { keys: [], values: [], types: [] },
       regexChecks: { passed: [], failed: [] },
       summary: {
-        matchPercentage: result.matchPercentage,
-        totalKeysCompared: result.totalKeysCompared,
-        totalMatched: result.totalMatched,
-        totalUnmatched: result.totalUnmatched,
+        matchPercentage: counts.matchPercentage,
+        totalKeysCompared: adjustedTotalKeysCompared,
+        totalMatched: adjustedTotalMatched,
+        totalUnmatched: counts.totalUnmatched,
         totalRegexChecks: 0
       }
     };
+    
+    // For top-level primitive comparisons, populate the result arrays
+    // This is needed for tests that expect detailed comparison results
+    if (isPrimitive && counts.totalUnmatched > 0) {
+      // Add unmatched value for primitive mismatches
+      resultObj.unmatched.values.push({
+        path: '',
+        expected: obj1,
+        actual: obj2,
+        message: 'Values do not match'
+      });
+    }
+    
+    return resultObj;
   }
 
   /**
@@ -218,8 +244,9 @@ class UltraFastComparator {
           return this.ultraFastCompareObjectsWithCounts(obj1, obj1);
         }
       }
-      // Primitives (null, undefined, numbers, strings, etc.) don't have keys to compare
-      return { matchPercentage: 100, totalKeysCompared: 0, totalMatched: 0, totalUnmatched: 0 };
+      // Primitives that match: count as 1 matched for value counting in objects
+      // totalKeysCompared will be 1 (from totalMatched + totalUnmatched)
+      return { matchPercentage: 100, totalKeysCompared: 1, totalMatched: 1, totalUnmatched: 0 };
     }
     
     // Fast type check

@@ -239,7 +239,8 @@ class Result {
    * Calculate and update the summary
    */
   updateSummary() {
-    const totalMatched = this.data.matched.keys.length;
+    // Count both matched keys and matched values
+    const totalMatched = this.data.matched.keys.length + this.data.matched.values.length;
     
     // If strictTypes is false, don't count type mismatches as unmatched items
     const strictTypes = this.options.strictTypes !== undefined ? this.options.strictTypes : true;
@@ -252,8 +253,12 @@ class Result {
     const totalKeysCompared = totalMatched + totalUnmatched;
     const totalRegexChecks = this.data.regexChecks.passed.length + this.data.regexChecks.failed.length;
 
+    // Calculate percentage and round to 2 decimal places for consistency
+    const rawPercentage = totalKeysCompared > 0 ? (totalMatched / totalKeysCompared) * 100 : 100;
+    const matchPercentage = Math.round(rawPercentage * 100) / 100;
+
     this.data.summary = {
-      matchPercentage: totalKeysCompared > 0 ? (totalMatched / totalKeysCompared) * 100 : 100,
+      matchPercentage,
       totalKeysCompared,
       totalMatched,
       totalUnmatched,

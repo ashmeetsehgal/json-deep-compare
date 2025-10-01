@@ -188,6 +188,13 @@ class FastComparator {
       }
     }
 
+    // Account for extra keys in obj2 that aren't in obj1
+    const extraKeys = len2 - len1;
+    if (extraKeys > 0) {
+      // Extra keys count as unmatched
+      unmatched += extraKeys;
+    }
+
     const totalKeys = matched + unmatched;
     const matchPercentage = totalKeys > 0 ? (matched / totalKeys) * 100 : 100;
 

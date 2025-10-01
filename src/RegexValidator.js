@@ -95,7 +95,15 @@ class RegexValidator {
       
       // Exact full path match (e.g., 'user.email' === 'user.email')
       if (keyPath === path) {
-        shouldCheck = true;
+        // If both keyPath and path are simple key names (no dots), check matchKeysByName setting
+        // This allows disabling key name matching when matchKeysByName is explicitly false
+        if (!keyPath.includes('.') && !path.includes('.')) {
+          // Simple key name match - only allow if matchKeysByName is not explicitly false
+          shouldCheck = this.options.matchKeysByName !== false;
+        } else {
+          // Full path match - always allow
+          shouldCheck = true;
+        }
       } 
       // Partial path match / Key name match (enabled by default, disabled if matchKeysByName is explicitly false)
       // This handles cases like path='user.email' matching keyPath='email'
@@ -197,5 +205,8 @@ class RegexValidator {
            result.regexChecks.failed.some(item => item.path === path);
   }
 }
+
+// Expose RegexCache for testing and monitoring
+RegexValidator.RegexCache = RegexCache;
 
 module.exports = RegexValidator;

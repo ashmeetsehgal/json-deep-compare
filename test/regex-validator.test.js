@@ -392,7 +392,8 @@ describe('RegexValidator Tests', () => {
     });
 
     test('should cache regex patterns efficiently', () => {
-      const pattern = 'test';
+      // Use a unique pattern to avoid interference from other tests
+      const pattern = `test-unique-pattern-${Date.now()}`;
       const startSize = RegexValidator.RegexCache.size();
       
       // Get same pattern multiple times

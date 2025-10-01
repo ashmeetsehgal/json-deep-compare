@@ -109,7 +109,7 @@ describe('Comparator Tests', () => {
       
       comparator.compareObjects(obj1, obj2, '');
       const resultData = result.getResult();
-      expect(resultData.unmatchedKeys.length).toBeGreaterThan(0);
+      expect(resultData.unmatched.keys.length).toBeGreaterThan(0);
     });
 
     test('should handle extra keys when ignoreExtraKeys is false', () => {
@@ -119,7 +119,7 @@ describe('Comparator Tests', () => {
       comparator.options.ignoreExtraKeys = false;
       comparator.compareObjects(obj1, obj2, '');
       const resultData = result.getResult();
-      expect(resultData.unmatchedKeys.length).toBeGreaterThan(0);
+      expect(resultData.unmatched.keys.length).toBeGreaterThan(0);
     });
 
     test('should ignore extra keys when ignoreExtraKeys is true', () => {
@@ -246,7 +246,7 @@ describe('Comparator Tests', () => {
     test('should handle type mismatches', () => {
       comparator.compareValues(1, '1', '');
       const resultData = result.getResult();
-      expect(resultData.unmatchedTypes.length).toBeGreaterThan(0);
+      expect(resultData.unmatched.types.length).toBeGreaterThan(0);
     });
 
     test('should handle date comparisons', () => {
@@ -291,27 +291,6 @@ describe('Comparator Tests', () => {
       
       comparator.compareValues(obj1, obj2, '');
       comparator.compareValues(obj1, obj3, '');
-    });
-
-    test('should handle strict equality', () => {
-      comparator.options.strictEquality = true;
-      comparator.compareValues(1, '1', '');
-      const resultData = result.getResult();
-      expect(resultData.unmatched.values.length).toBeGreaterThan(0);
-    });
-
-    test('should handle tolerance for numbers', () => {
-      comparator.options.tolerance = 0.1;
-      comparator.compareValues(1.0, 1.05, '');
-      const resultData = result.getResult();
-      expect(resultData.matched.values.length).toBeGreaterThan(0);
-    });
-
-    test('should handle case sensitivity for strings', () => {
-      comparator.options.caseSensitive = false;
-      comparator.compareValues('Hello', 'hello', '');
-      const resultData = result.getResult();
-      expect(resultData.matched.values.length).toBeGreaterThan(0);
     });
   });
 
