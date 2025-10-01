@@ -20,9 +20,9 @@
     "README.md"
   ],
   "scripts": {
-    "test": "vitest --reporter=verbose --globals",
-    "test:run": "vitest run --reporter=verbose --globals",
-    "test:coverage": "vitest run --coverage --reporter=verbose --globals",
+    "test": "node -r ./setup-ci.js -e \"require('child_process').execSync('npx vitest --reporter=verbose --globals', {stdio: 'inherit'})\"",
+    "test:run": "node -r ./setup-ci.js -e \"require('child_process').execSync('npx vitest run --reporter=verbose --globals', {stdio: 'inherit'})\"",
+    "test:coverage": "node -r ./setup-ci.js -e \"require('child_process').execSync('npx vitest run --coverage --reporter=verbose --globals', {stdio: 'inherit'})\"",
     "test:ui": "vitest --ui",
     "test:watch": "vitest --watch",
     "test:formats": "npm run build && node test/cjs-test.js && node --experimental-modules test/esm-test.mjs",
