@@ -193,7 +193,7 @@ class ErrorHandler {
    */
   static createSafeComparison(compareFn, context = 'comparison', fallback = false) {
     return (obj1, obj2) => {
-      return this.safeExecute(() => compareFn(obj1, obj2), context, fallback);
+      return ErrorHandler.safeExecute(() => compareFn(obj1, obj2), context, fallback);
     };
   }
 

@@ -4,8 +4,11 @@
  * @description Common comparison logic extracted to reduce code duplication and improve maintainability
  */
 
+const CommonComparison = require('./CommonComparison');
+
 /**
  * Shared comparison utilities used across different comparators
+ * Delegates basic comparison operations to CommonComparison to eliminate duplication
  * @private
  */
 class ComparisonUtils {
@@ -16,7 +19,7 @@ class ComparisonUtils {
    * @returns {boolean} Whether objects are reference equal
    */
   static referenceEqual(obj1, obj2) {
-    return obj1 === obj2;
+    return CommonComparison.referenceEqual(obj1, obj2);
   }
 
   /**
@@ -26,7 +29,7 @@ class ComparisonUtils {
    * @returns {boolean} Whether objects have the same type
    */
   static typeEqual(obj1, obj2) {
-    return typeof obj1 === typeof obj2;
+    return CommonComparison.typeEqual(obj1, obj2);
   }
 
   /**
@@ -36,10 +39,7 @@ class ComparisonUtils {
    * @returns {boolean|null} Comparison result, or null if not null/undefined case
    */
   static nullCheck(obj1, obj2) {
-    if (obj1 == null || obj2 == null) {
-      return obj1 === obj2;
-    }
-    return null; // Not a null case, continue with other checks
+    return CommonComparison.nullCheck(obj1, obj2);
   }
 
   /**
@@ -49,14 +49,7 @@ class ComparisonUtils {
    * @returns {boolean|null} Comparison result, or null if not primitive case
    */
   static primitiveCompare(obj1, obj2) {
-    if (typeof obj1 !== 'object') {
-      // Handle NaN comparison - for comparison purposes, NaN === NaN
-      if (typeof obj1 === 'number' && typeof obj2 === 'number') {
-        if (isNaN(obj1) && isNaN(obj2)) return true; // NaN === NaN for comparison
-      }
-      return obj1 === obj2;
-    }
-    return null; // Not a primitive case
+    return CommonComparison.primitiveCompare(obj1, obj2);
   }
 
   /**
@@ -66,7 +59,7 @@ class ComparisonUtils {
    * @returns {boolean} Whether both are arrays
    */
   static bothArrays(obj1, obj2) {
-    return Array.isArray(obj1) && Array.isArray(obj2);
+    return CommonComparison.bothArrays(obj1, obj2);
   }
 
   /**
@@ -76,10 +69,7 @@ class ComparisonUtils {
    * @returns {boolean} Whether both are plain objects
    */
   static bothPlainObjects(obj1, obj2) {
-    return typeof obj1 === 'object' && typeof obj2 === 'object' &&
-           obj1 !== null && obj2 !== null &&
-           Object.getPrototypeOf(obj1) === Object.prototype && 
-           Object.getPrototypeOf(obj2) === Object.prototype;
+    return CommonComparison.bothPlainObjects(obj1, obj2);
   }
 
   /**
@@ -89,7 +79,7 @@ class ComparisonUtils {
    * @returns {boolean} Whether arrays have the same length
    */
   static arrayLengthEqual(arr1, arr2) {
-    return arr1.length === arr2.length;
+    return CommonComparison.arrayLengthEqual(arr1, arr2);
   }
 
   /**
@@ -99,7 +89,7 @@ class ComparisonUtils {
    * @returns {boolean} Whether objects have the same number of keys
    */
   static objectKeysCountEqual(obj1, obj2) {
-    return Object.keys(obj1).length === Object.keys(obj2).length;
+    return CommonComparison.objectKeysCountEqual(obj1, obj2);
   }
 
   /**
