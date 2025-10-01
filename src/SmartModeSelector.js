@@ -106,7 +106,12 @@ class SmartModeSelector {
       return true;
     }
     
-    // For objects, check keys and values
+    // Check for non-plain objects that need special handling
+    if (!this.isPlainObject(obj1) || !this.isPlainObject(obj2)) {
+      return this.compareNonPlainObjects(obj1, obj2);
+    }
+    
+    // For plain objects, check keys and values
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
     
@@ -118,6 +123,100 @@ class SmartModeSelector {
     }
     
     return true;
+  }
+
+  /**
+   * Check if an object is a plain object (not Date, RegExp, Map, Set, etc.)
+   * @param {*} obj - Object to check
+   * @returns {boolean} Whether the object is a plain object
+   */
+  static isPlainObject(obj) {
+    if (obj === null || typeof obj !== 'object') return false;
+    
+    // Check if it's a plain object by verifying constructor and prototype
+    return Object.prototype.toString.call(obj) === '[object Object]' && 
+           (obj.constructor === Object || obj.constructor === undefined);
+  }
+
+  /**
+   * Compare non-plain objects with type-specific logic
+   * @param {*} obj1 - First object
+   * @param {*} obj2 - Second object
+   * @returns {boolean} Whether objects are identical
+   */
+  static compareNonPlainObjects(obj1, obj2) {
+    // Different types are not equal
+    if (obj1.constructor !== obj2.constructor) return false;
+    
+    // Date objects - compare timestamps
+    if (obj1 instanceof Date) {
+      return obj1.getTime() === obj2.getTime();
+    }
+    
+    // RegExp objects - compare source and flags
+    if (obj1 instanceof RegExp) {
+      return obj1.source === obj2.source && obj1.flags === obj2.flags;
+    }
+    
+    // Map objects - compare size and entries
+    if (obj1 instanceof Map) {
+      if (obj1.size !== obj2.size) return false;
+      for (const [key, value] of obj1) {
+        if (!obj2.has(key)) return false;
+        if (!this.areObjectsIdentical(value, obj2.get(key))) return false;
+      }
+      return true;
+    }
+    
+    // Set objects - compare size and values
+    if (obj1 instanceof Set) {
+      if (obj1.size !== obj2.size) return false;
+      for (const value of obj1) {
+        if (!obj2.has(value)) return false;
+      }
+      return true;
+    }
+    
+    // Buffer objects - compare contents
+    if (Buffer.isBuffer(obj1)) {
+      return Buffer.isBuffer(obj2) && obj1.equals(obj2);
+    }
+    
+    // ArrayBuffer objects - compare byte lengths and contents
+    if (obj1 instanceof ArrayBuffer) {
+      if (obj1.byteLength !== obj2.byteLength) return false;
+      return new Uint8Array(obj1).every((byte, index) => 
+        byte === new Uint8Array(obj2)[index]
+      );
+    }
+    
+    // TypedArray objects - compare length and elements
+    if (ArrayBuffer.isView(obj1)) {
+      if (!ArrayBuffer.isView(obj2)) return false;
+      if (obj1.constructor !== obj2.constructor) return false;
+      if (obj1.length !== obj2.length) return false;
+      return obj1.every((value, index) => value === obj2[index]);
+    }
+    
+    // Error objects - compare name, message, and stack
+    if (obj1 instanceof Error) {
+      return obj1.name === obj2.name && 
+             obj1.message === obj2.message && 
+             obj1.stack === obj2.stack;
+    }
+    
+    // Function objects - compare string representation
+    if (typeof obj1 === 'function') {
+      return obj1.toString() === obj2.toString();
+    }
+    
+    // For other non-plain objects, fall back to prototype comparison
+    if (Object.getPrototypeOf(obj1) !== Object.getPrototypeOf(obj2)) {
+      return false;
+    }
+    
+    // If we reach here, treat as different (conservative approach)
+    return false;
   }
 
   /**
