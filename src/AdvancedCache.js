@@ -198,7 +198,7 @@ class AdvancedCache {
         }
         
         // Handle plain objects
-        const keys = Object.keys(obj).sort(); // Deterministic key ordering
+        const keys = Object.keys(obj).sort((a, b) => a.localeCompare(b)); // Deterministic key ordering
         const pairs = keys.map(key => {
           const value = this.serializeForHash(obj[key], seen);
           return `${key}:${value}`;

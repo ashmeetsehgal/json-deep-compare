@@ -137,7 +137,7 @@ class ComparisonUtils {
    * @returns {Object} Failure result object
    */
   static createFailureResult(totalKeys, matched = 0, unmatched = null) {
-    const actualUnmatched = unmatched !== null ? unmatched : totalKeys - matched;
+    const actualUnmatched = unmatched ?? totalKeys - matched;
     return this.createResult(0, totalKeys, matched, actualUnmatched);
   }
 

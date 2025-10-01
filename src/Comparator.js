@@ -118,7 +118,7 @@ class Comparator {
     }
 
     // Add object pair to visited pairs map (only for non-null objects)
-    if (typeof obj1 === 'object' && obj1 !== null && typeof obj2 === 'object' && obj2 !== null) {
+    if (typeof obj1 === 'object' && typeof obj2 === 'object') {
       if (!visitedPairs.has(obj1)) {
         visitedPairs.set(obj1, new WeakSet());
       }
